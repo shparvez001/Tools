@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<!--needs fixing-->
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+  
+  <!-- Optional theme -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+  
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+  
+  
+  <!-- jQuery library -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  
+  <!-- Latest compiled JavaScript -->
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <style type="text/css">
+  
+    
+  </style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.bundle.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.js"></script>
+<script language = "javascript" type = "text/javascript">
+
+var rho = [
+  ["Fresh Water", "Salt Water","Air", "Liquid Hydrogen", "Styrofoam", "Cork", "Lithium", "Wood", "Concrete", "Silicon", "Aluminum", "Iron", "Copper", "lead", "Gold" ],
+  [1000,1030, 1.2, 70, 75, 240, 535, 700, 2400, 2330, 2700, 7870, 8940, 11340, 19320 ]
+];
+
+var eta = [
+  ["water", "Methanol", "Mercury", "Glycerol", "Benzene", "Ethanol", "Air" ],
+  [0.00089,0.000544, 0.001526, 0.934, 0.000604, 0.001074, 18.5e-6  ]
+];
+</script>
+
+<title>Terminal Velocity Simulator</title>
+
+</head>
+
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container-fluid">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/"><img alt="SHP's Most used toolset"></a>
+      </div>
+  
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul class="nav navbar-nav">
+        <li><a href="/">Home</a></li>
+        <li><a href="resistor.html">Resistance</a></li>
+        
+        <li><a href="capacitor.html">Capacitance</a></li>
+        <li><a href="terminalVelocity.html">Terminal Velocity</a></li>
+        <li><a href="math.html">Math Tools</a></li>
+         
+  
+        </ul>
+        <!--
+        <form class="navbar-form navbar-left" role="search">
+          <div class="form-group">
+            <input type="text" class="form-control" placeholder="Search">
+          </div>
+          <button type="submit" class="btn btn-default">Submit</button>
+        </form>
+        -->
+        <!--
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="http://weather.shparvez.net/">Home page</a></li>
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">More coming soon <span class="caret"></span></a>
+            <ul class="dropdown-menu" role="menu">
+              <li><a href="#">Action</a></li>
+              <li><a href="#">Another action</a></li>
+              <li><a href="#">Something else here</a></li>
+              <li class="divider"></li>
+              <li><a href="#">Separated link</a></li>
+            </ul>
+            -->
+          </li>
+        </ul>
+      </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+  </nav>
+  
+
+<body>
+
+    <br><br><br>
+
+    <div class="container-fluid" style="position: relative">
+
+        <div class="row">
+
+
+
+            <div  class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+                <div class="jumbotron">
+                <div  class="blog-post">
+                
+                
+                
+                <h1>Terminal Velocity Simulator</h1>
+                        <p class="lead">This simulation Estimates the terminal velocity of any spherical object falling through a fluid. Stokes law is used.</p>
+                
+                
+                <div class="container-fluid" style="color: black;  background: #dcfba5; !important">
+                 <div class="col-xs-12 col-sm-6">
+                     
+                Density of solid in kg/m^3  <input id="rho_s" type="text" size="8" value="7870"  oninput="vTerm()"> 
+                
+                <select id="rho_ss" onchange="rhoSPush()">
+                    <option selected="selected" value=" ">Select</option>
+                <?php
+                    for ($i=0;$i<=14;$i++)
+                    {
+                        ?>
+                        
+                       <option value="<?php echo $i; ?>"><script>document.write(rho[0][<?php echo $i; ?>]);</script></option>
+                        
+                <?php
+                    }
+                ?>
+                    
+                    
+                    
+                    </select>
+                <br>
+                
+                Density of fluid in kg/m^3  <input id="rho_f" type="text" size="8" value="1000" onkeyup="" oninput="vTerm()">
+                <select id="rho_ff" onchange="rhoFPush()">
+                    <option selected="selected" value=" ">Select</option>
+                <?php
+                    for ($i=0;$i<=14;$i++)
+                    {
+                        ?>
+                        
+                       <option value="<?php echo $i; ?>"><script>document.write(rho[0][<?php echo $i; ?>]);</script></option>
+                        
+                <?php
+                    }
+                ?>
+                    </select>
+                <br>
+                Viscosity of fluid in PaS   <input id="eta_f" type="text" size="8" value="0.001" onkeyup="" oninput="vTerm()"> 
+                <select id="eta_ff" onchange="etaFPush()">
+                    <option selected="selected" value=" ">Select</option>
+                <?php
+                    for ($i=0;$i<=6;$i++)
+                    {
+                        ?>
+                        
+                       <option value="<?php echo $i; ?>"><script>document.write(eta[0][<?php echo $i; ?>]);</script></option>
+                        
+                <?php
+                    }
+                ?>
+                    </select>
+                <br>
+                   
+                <p>Select the diameter in mm
+                <select id="diameter" onchange="vTerm()">
+                    <option selected="selected" value=" ">Select</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                </select>
+                </p>
+                
+                
+                
+                
+                 <div id ='Resistance'></div>     
+                     
+                 </div>
+                 
+                 <div id="graph-container" class="col-xs-12 col-sm-6">
+                 
+                 </div>
+                
+                
+                </div>
+                <p>A good list of viscosities are available at https://en.wikipedia.org/wiki/List_of_viscosities</p>
+                <p>A good list of densities as available in https://en.wikipedia.org/wiki/Density#Densities</p>
+                
+                <P id="debug"> </P>
+                 
+                </div><!-- /Blog post -->
+                </div><!-- /Jumbotron -->
+                
+                
+                
+                      
+                      <script language = "javascript" type = "text/javascript">
+                         
+                            function vTerm(){
+                  resetCanvas();              
+                          
+                               var d = document.getElementById('diameter').value;
+                               var d=d/1000;
+                               var r=d/2;
+                               var pi=3.142;
+                               var g=9.81;
+                               var volume=(4/3)*pi*r**3;
+                               
+                               
+                               var time=[];
+                               var velocity=[];
+                               var distance=[];
+                               
+                               var rhoS = document.getElementById('rho_s').value;
+                               var rhoF = document.getElementById('rho_f').value;
+                               var eta = document.getElementById('eta_f').value;
+                               var mass=rhoS*volume;
+                               
+                               var t=0;
+                               velocity_i=0.00;
+                               distance_=0.00;
+                               var weight= rhoS*volume*g;
+                               var upthrust= rhoF*volume*g;
+                               var drag=6*pi*r*eta*velocity_i;
+                               var resultantForce=weight-upthrust-drag;
+                               var acceleration=resultantForce/mass;
+                               var velocity_f= velocity_i +acceleration*t;
+                               
+                   /*            */         
+                               for (t = 0; t <= 200; t++) {
+                                   velocity_i=velocity_f;
+                                   drag=6*pi*r*eta*velocity_i;
+                                   resultantForce=weight-upthrust-drag;
+                                   acceleration=resultantForce/mass;
+                                   acceleration=acceleration.toFixed(2);
+                                   distance_=distance_+velocity_i;
+                                   velocity_f= velocity_i + acceleration*1;
+                                   distance.push(distance_);
+                                   velocity.push(velocity_f);
+                                   time.push(t);
+                                }
+                                
+                                var timeToReachVTerm=velocity.indexOf(velocity_f)
+                               
+                               
+                               document.getElementById("Resistance").innerHTML = "Terminal velocity is: " + velocity_f.toFixed(2) 
+                               +"m/s<br>Distance Travelled is: " + distance_.toFixed(2) 
+                               +"m<br> Time to reach Terminal Velocity is "+timeToReachVTerm + "s"
+                               +"<br>Distance travelled before reaching Terminal Velocity is "+distance[timeToReachVTerm].toFixed(2)+"m";
+                
+                //myChart.destroy()
+                
+                var ctx = document.getElementById("velocityChart").getContext('2d');
+                var velocityChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: time,
+                        label:'Time',
+                        datasets: [{
+                            label: 'Velocity',
+                            fill: false,
+                            data: velocity,
+                            borderWidth: 1,
+                            borderColor: 'purple',
+                            pointRadius: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            xAxes: [{
+                                        display: true,
+                                        scaleLabel: {
+                                            display: true,
+                                            labelString: 'Time in second'
+                                        }
+                                    }],
+                             yAxes: [{
+                                        display: true,
+                                        scaleLabel: {
+                                            display: true,
+                                            labelString: 'Velocity in m/s'
+                                        },
+                                        ticks: {
+                                         //suggestedMin: 20,
+                                         //suggestedMax: 60, 
+                                         //stepSize: 5,
+                                         
+                                                },
+                                    }]
+                        }
+                    }
+                });
+                
+                var ctx = document.getElementById("distanceChart").getContext('2d');
+                var distanceChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: time,
+                        label:'Time',
+                        datasets: [{
+                            label: 'Distance',
+                            fill: false,
+                            data: distance,
+                            borderWidth: 1,
+                            borderColor: 'purple',
+                            pointRadius: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            xAxes: [{
+                                        display: true,
+                                        scaleLabel: {
+                                            display: true,
+                                            labelString: 'Time in second'
+                                        }
+                                    }],
+                             yAxes: [{
+                                        display: true,
+                                        scaleLabel: {
+                                            display: true,
+                                            labelString: 'Distance in m'
+                                        },
+                                        ticks: {
+                                         //suggestedMin: 20,
+                                         //suggestedMax: 60, 
+                                         //stepSize: 5,
+                                         
+                                                },
+                                    }]
+                        }
+                    }
+                });
+                
+                
+                //Closing bracket for vTerm function
+                }
+                
+                
+                
+                // the following code does not works.
+                var resetCanvas = function(){
+                  $('#velocityChart').remove(); // this is my <canvas> element
+                  $('#distanceChart').remove();
+                  $('#graph-container').append('<canvas id="velocityChart" width="500" height="500" onfocus="vTerm()"></canvas> <canvas id="distanceChart" width="500" height="500" onfocus="vTerm()"></canvas>');
+                  //canvas = document.querySelector('#myChart');
+                  //ctx = canvas.getContext('2d');
+                  //ctx.canvas.width = $('#graph').width(); // resize to parent width
+                  //ctx.canvas.height = $('#graph').height(); // resize to parent height
+                  //var x = canvas.width/2;
+                  //var y = canvas.height/2;
+                  //ctx.font = '10pt Verdana';
+                  //ctx.textAlign = 'center';
+                  //ctx.fillText('This text is centered on the canvas', x, y);
+                };
+                
+                </script>
+                
+                <script language = "javascript" type = "text/javascript">
+                
+                
+                
+                
+                
+                
+                //console.log(rho[0][0]); // 1
+                //console.log(rho);
+                
+                
+                
+                
+                
+                function rhoSPush() 
+                {
+                    var d = document.getElementById('rho_ss').value;
+                    
+                    document.getElementById("rho_s").value =  rho[1][d] ;
+                   // document.getElementById("debug").innerHTML =  rho[1][d] ;
+                }
+                
+                function rhoFPush() 
+                {
+                    var d = document.getElementById('rho_ff').value;
+                    
+                    document.getElementById("rho_f").value =  rho[1][d] ;
+                   // document.getElementById("debug").innerHTML =  rho[1][d] ;
+                }
+                
+                function etaFPush() 
+                {
+                    var d = document.getElementById('eta_ff').value;
+                    
+                    document.getElementById("eta_f").value =  eta[1][d] ;
+                   // document.getElementById("debug").innerHTML =  rho[1][d] ;
+                }
+                
+                
+                </script>
+            </div><!-- /inner main content container -->
+            <br><br>
+
+
+            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3 sidebar">
+
+
+                <!--<?php include 'time.php'; ?>-->
+                <!--<?php include 'sharer.php'; ?>-->
+
+            </div><!-- /sidebar -->
+
+
+        </div> <!-- /row -->
+
+        <br><br><br><br>
+
+
+        <div class="jumbotron4">
+
+
+
+            copyright SHP @ 2024
+        </div> <!-- /footer div -->
+
+    </div> <!-- /container -->
+
+
+</body>
+
+</html>

@@ -1,0 +1,33 @@
+td.one {background: #acfff0; bgcolor="#acfff0";	}
+  
+  td.two {background: #ffdaa1; bgcolor="#ffdaa1";	}
+  
+  .jumbotron  {background: #008db7; bgcolor="#008db7";	}
+  
+  .jumbotron2  {background: #13c9c5; bgcolor="#13c9c5";	}
+  
+  .jumbotron3  {background: #4adb8e; bgcolor="#4adb8e";  position: fixed;
+      bottom: 0; width: 95%;
+      }
+  .jumbotron4  {background: #008db7; bgcolor="#008db7";	}
+  
+   /* unvisited link */
+  a:link {
+      color: yellow;
+  }
+  
+  /* visited link */
+  a:visited {
+      color: yellow;
+  }
+  
+  /* mouse over link */
+  a:hover {
+      color: hotpink;
+  }
+  
+  /* selected link */
+  a:active {
+      color: magenta;
+  }
+  
