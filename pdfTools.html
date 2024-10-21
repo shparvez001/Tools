@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+  
+  <!-- Optional theme -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+  
+
+  <!-- jQuery library -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+  
+  
+  
+  <!-- Latest compiled JavaScript -->
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <style type="text/css">
+  
+    
+  </style>
+    <title>SHP's Most used toolset</title>
+
+</head>
+
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container-fluid">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/"><img alt="SHP's Most used toolset"></a>
+      </div>
+  
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul class="nav navbar-nav">
+        <li><a href="/">Home</a></li>
+        <li><a href="resistor.html">Resistance</a></li>
+        
+        <li><a href="capacitor.html">Capacitance</a></li>
+        <li><a href="terminalVelocity.html">Terminal Velocity</a></li>
+        <li><a href="math.html">Math Tools</a></li>
+         
+  
+        </ul>
+        <!--
+        <form class="navbar-form navbar-left" role="search">
+          <div class="form-group">
+            <input type="text" class="form-control" placeholder="Search">
+          </div>
+          <button type="submit" class="btn btn-default">Submit</button>
+        </form>
+        -->
+        <!--
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="http://weather.shparvez.net/">Home page</a></li>
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">More coming soon <span class="caret"></span></a>
+            <ul class="dropdown-menu" role="menu">
+              <li><a href="#">Action</a></li>
+              <li><a href="#">Another action</a></li>
+              <li><a href="#">Something else here</a></li>
+              <li class="divider"></li>
+              <li><a href="#">Separated link</a></li>
+            </ul>
+            -->
+          </li>
+        </ul>
+      </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+  </nav>
+  
+
+<body>
+
+    <br><br><br>
+
+    <div class="container-fluid" style="position: relative">
+
+        <div class="row">
+
+
+
+            <div style="color: blue; " class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+                    
+                
+                
+                <div style="background: #dcfba5; !important"     class="container-fluid"    >
+                
+                    <h1>PDF Page Processor</h1>
+                
+                <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3"  ; !important"  class="jumbotron"  > </div>
+                <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6"  ; !important"  class="jumbotron"  >
+                
+                
+    <!-- File input for uploading a PDF -->
+    <label for="pdfFile">Upload PDF:</label>
+    <input type="file" id="pdfFile" />
+
+    <br><br>
+
+    <!-- URL input for providing a link to the PDF -->
+    <label for="pdfUrl">Or provide a link to PDF:</label>
+    <input type="text" id="pdfUrl" placeholder="https://example.com/sample.pdf" style="width: 300px;" />
+
+    <br><br>
+
+    <!-- Input field for user-specified criteria to omit pages -->
+    <label for="omitCriteria">Enter criteria to omit pages (e.g., "blank page"):</label>
+    <input type="text" id="omitCriteria" placeholder="Enter text to omit pages" value="blank page"/>
+
+    <br><br>
+
+    <!-- Buttons to process the PDF -->
+    <button id="processPdf">Process PDF (2-in-1 & Omit Pages)</button>
+                      
+    <!-- PDF.js and PDF-lib libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.10.377/build/pdf.min.js"></script>
+    <script src="https://unpkg.com/pdf-lib@1.16.0"></script>
+
+    <script>
+        async function fetchPdfFromUrl(url) {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Failed to fetch the PDF from the URL');
+            return await response.arrayBuffer();
+        }
+
+        async function extractTextFromPage(pdf, pageIndex) {
+            const page = await pdf.getPage(pageIndex + 1);
+            const textContent = await page.getTextContent();
+            const strings = textContent.items.map(item => item.str);
+            return strings.join(' ');
+        }
+
+        async function mergePages(newPdfDoc, page1, page2) {
+            // Embed the two pages into the new document
+            const [embeddedPage1, embeddedPage2] = await newPdfDoc.embedPages([page1, page2]);
+
+            const width = embeddedPage1.width;
+            const height = embeddedPage1.height;
+
+            // Create a new page with width = 2 * single page width to fit both side by side
+            const mergedPage = newPdfDoc.addPage([width * 2, height]);
+
+            // Draw page 1 on the left
+            mergedPage.drawPage(embeddedPage1, {
+                x: 0,
+                y: 0,
+                width: width,
+                height: height,
+            });
+
+            // Draw page 2 on the right, if it exists
+            if (embeddedPage2) {
+                mergedPage.drawPage(embeddedPage2, {
+                    x: width,
+                    y: 0,
+                    width: width,
+                    height: height,
+                });
+            }
+        }
+
+        document.getElementById('processPdf').addEventListener('click', async () => {
+            const omitCriteria = document.getElementById('omitCriteria').value.trim().toLowerCase(); // Get the user's input
+
+            const fileInput = document.getElementById('pdfFile');
+            const pdfUrl = document.getElementById('pdfUrl').value.trim();
+            let arrayBuffer;
+            let originalFileName = '';
+
+            // Fetch the PDF either from a file upload or a URL
+            if (fileInput.files[0]) {
+                const file = fileInput.files[0];
+                originalFileName = file.name; // Capture the original file name
+                arrayBuffer = await file.arrayBuffer();
+            } else if (pdfUrl) {
+                originalFileName = pdfUrl.split('/').pop(); // Extract file name from URL
+                try {
+                    arrayBuffer = await fetchPdfFromUrl(pdfUrl);
+                } catch (error) {
+                    alert('Failed to fetch the PDF from the provided URL');
+                    return;
+                }
+            } else {
+                alert('Please upload a PDF file or provide a link to a PDF.');
+                return;
+            }
+
+            const pdfjsLib = window['pdfjs-dist/build/pdf'];
+            pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@2.10.377/build/pdf.worker.min.js`;
+            const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+            const pdf = await loadingTask.promise;
+
+            const totalPages = pdf.numPages;
+            const pagesToKeep = [];
+
+            // Check each page for the user-specified omit criteria
+            for (let i = 0; i < totalPages; i++) {
+                const pageText = await extractTextFromPage(pdf, i);
+                if (!pageText.toLowerCase().includes(omitCriteria)) {
+                    pagesToKeep.push(i); // Keep this page if it doesn't contain the omit criteria
+                }
+            }
+
+            const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+            const newPdfDoc = await PDFLib.PDFDocument.create();
+
+            // Set the title metadata with the original file name
+            newPdfDoc.setTitle(`Merged PDF from: ${originalFileName}`);
+
+            // Loop through pages to keep and merge them two at a time
+            for (let i = 0; i < pagesToKeep.length; i += 2) {
+                const page1 = await pdfDoc.getPage(pagesToKeep[i]);
+                const page2 = (i + 1 < pagesToKeep.length) ? await pdfDoc.getPage(pagesToKeep[i + 1]) : null;
+
+                if (page2) {
+                    await mergePages(newPdfDoc, page1, page2); // Merge two pages into one
+                } else {
+                    // If there's an odd number of pages, add the last page on the left and leave the right blank
+                    const [embeddedPage1] = await newPdfDoc.embedPages([page1]);
+                    const width = embeddedPage1.width;
+                    const height = embeddedPage1.height;
+                    const mergedPage = newPdfDoc.addPage([width * 2, height]); // Create a double-width page
+
+                    // Draw the last page on the left
+                    mergedPage.drawPage(embeddedPage1, {
+                        x: 0,
+                        y: 0,
+                        width: width,
+                        height: height,
+                    });
+
+                    // Leave the right side blank (no drawing)
+                }
+            }
+
+            const pdfBytes = await newPdfDoc.save();
+            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${originalFileName}_modified_2in1.pdf`;
+            link.click();
+        });
+    </script>                
+                
+                
+                </div>
+                <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3"  ; !important"  class="jumbotron"  > </div>
+                        
+                     
+                      
+                
+                
+                
+                </div> <!-- /Button container -->
+                
+
+            </div><!-- /inner main content container -->
+            <br><br>
+
+
+            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3 sidebar">
+
+
+                <!--<?php include 'time.php'; ?>-->
+                <!--<?php include 'sharer.php'; ?>-->
+
+            </div><!-- /sidebar -->
+
+
+        </div> <!-- /row -->
+
+        <br><br><br><br>
+
+
+        <div class="jumbotron4">
+
+
+
+            copyright SHP @ 2024
+        </div> <!-- /footer div -->
+
+    </div> <!-- /container -->
+
+
+</body>
+
+</html>
