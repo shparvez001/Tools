@@ -4,11 +4,15 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
-    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>-->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap-theme.min.css">
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="css/style.css">
     <style>
         .drop-zone {
@@ -72,9 +76,13 @@
                         <label for="omitCriteria">Enter criteria to omit pages (e.g., "blank page"):</label>
                         <input type="text" id="omitCriteria" placeholder="Enter text to omit pages" value="blank page" />
                         <br><br>
+                        <span  id="pagesOmitted"></span>
+                        <br>
                         <button id="processPdf">Process PDF (2-in-1 & Omit Pages)</button>
-                        <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.10.377/build/pdf.min.js"></script>
-                        <script src="https://unpkg.com/pdf-lib@1.16.0"></script>
+                        <!--<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.10.377/build/pdf.min.js"></script>
+                        <script src="https://unpkg.com/pdf-lib@1.16.0"></script>-->
+                        <script src="js/pdf.min.js"></script>
+                        <script src="js/pdf-lib.min.js"></script>
                         <script>
                             // Drag-and-drop functionality
                             const dropZone = document.getElementById('dropZone');
@@ -157,11 +165,16 @@
 
                                 const totalPages = pdf.numPages;
                                 const pagesToKeep = [];
+                                const pagesOmitted = [];
 
                                 for (let i = 0; i < totalPages; i++) {
                                     const pageText = await extractTextFromPage(pdf, i);
                                     if (!pageText.toLowerCase().includes(omitCriteria)) {
                                         pagesToKeep.push(i);
+                                    }
+                                    else
+                                    {
+                                        pagesOmitted.push(i);
                                     }
                                 }
 
@@ -183,6 +196,8 @@
                                         mergedPage.drawPage(embeddedPage1, { x: 0, y: 0, width: width, height: height });
                                     }
                                 }
+                                
+                                document.getElementById("pagesOmitted").innerText='Pages Omitted: '+pagesOmitted;
 
                                 const pdfBytes = await newPdfDoc.save();
                                 const blob = new Blob([pdfBytes], { type: 'application/pdf' });
