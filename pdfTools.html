@@ -79,10 +79,13 @@
                         <span  id="pagesOmitted"></span>
                         <br>
                         <button id="processPdf">Process PDF (2-in-1 & Omit Pages)</button>
+                        <!--<button id="convertToImage">Convert PDF to Images</button>-->
+                        <button id="convertToImage">Convert PDF to Images</button>
                         <!--<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.10.377/build/pdf.min.js"></script>
                         <script src="https://unpkg.com/pdf-lib@1.16.0"></script>-->
                         <script src="js/pdf.min.js"></script>
                         <script src="js/pdf-lib.min.js"></script>
+                        <script src="js/jszip.min.js"></script>
                         <script>
                             // Drag-and-drop functionality
                             const dropZone = document.getElementById('dropZone');
@@ -143,7 +146,7 @@
                                 // Fetch the PDF either from a file upload or a URL
                                 if (fileInput.files[0]) {
                                     const file = fileInput.files[0];
-                                    originalFileName = file.name;
+                                    originalFileName = file.name.split('.pdf')[0];
                                     arrayBuffer = await file.arrayBuffer();
                                 } else if (pdfUrl) {
                                     originalFileName = pdfUrl.split('/').pop();
@@ -206,6 +209,146 @@
                                 link.download = `${originalFileName}_modified_2in1.pdf`; // Append "_modified_2in1" to the original file name
                                 link.click();
                             });
+
+
+                            async function convertPdfToImages(pdfData) {
+                                const pdfjsLib = window['pdfjs-dist/build/pdf'];
+                                pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@2.10.377/build/pdf.worker.min.js`;
+                                
+                                const loadingTask = pdfjsLib.getDocument({ data: pdfData });
+                                const pdf = await loadingTask.promise;
+                                const totalPages = pdf.numPages;
+                                const file = fileInput.files[0];
+                                const originalFileName = file.name.split('.pdf')[0];
+
+                                // Create a container for images
+                                const imageContainer = document.createElement('div');
+                                document.body.appendChild(imageContainer);
+
+                                for (let i = 0; i < totalPages; i++) {
+                                    const page = await pdf.getPage(i + 1);
+                                    const viewport = page.getViewport({ scale: 2 }); // Adjust scale for higher resolution
+
+                                    // Create a canvas element for rendering
+                                    const canvas = document.createElement('canvas');
+                                    const context = canvas.getContext('2d');
+                                    canvas.width = viewport.width;
+                                    canvas.height = viewport.height;
+
+                                    const renderContext = {
+                                        canvasContext: context,
+                                        viewport: viewport,
+                                    };
+
+                                    // Render the page onto the canvas
+                                    await page.render(renderContext).promise;
+
+                                    // Convert the canvas to an image
+                                    const img = document.createElement('img');
+                                    img.src = canvas.toDataURL('image/png'); // Convert canvas to PNG
+
+                                    // Append image to container
+                                    imageContainer.appendChild(img);
+
+                                    // Optionally, add download link for each image
+                                    const downloadLink = document.createElement('a');
+                                    downloadLink.href = img.src;
+                                    downloadLink.download = originalFileName+`_page_${i + 1}.png`;
+                                    downloadLink.textContent = `Download Page ${i + 1}`;
+                                    imageContainer.appendChild(downloadLink);
+
+                                    // Optionally, separate pages with a line break
+                                    imageContainer.appendChild(document.createElement('br'));
+                                }
+                            }
+
+                            document.getElementById('convertToImage').addEventListener('click', async () => {
+                                let arrayBuffer;
+                                
+                                if (fileInput.files[0]) {
+                                    arrayBuffer = await fileInput.files[0].arrayBuffer();
+                                } else if (pdfUrl) {
+                                    try {
+                                        arrayBuffer = await fetchPdfFromUrl(pdfUrl);
+                                    } catch (error) {
+                                        alert('Failed to fetch the PDF from the provided URL');
+                                        return;
+                                    }
+                                } else {
+                                    alert('Please upload a PDF file or provide a link to a PDF.');
+                                    return;
+                                }
+
+                                await convertPdfToImages(arrayBuffer);
+                            });  
+                            
+                            async function convertPdfToImagesAsZip(pdfData) {
+                                const pdfjsLib = window['pdfjs-dist/build/pdf'];
+                                pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@2.10.377/build/pdf.worker.min.js`;
+
+                                const loadingTask = pdfjsLib.getDocument({ data: pdfData });
+                                const pdf = await loadingTask.promise;
+                                const totalPages = pdf.numPages;
+                                const file = fileInput.files[0];
+                                const originalFileName = file.name.split('.pdf')[0];
+
+                                // Initialize JSZip
+                                const zip = new JSZip();
+
+                                for (let i = 0; i < totalPages; i++) {
+                                    const page = await pdf.getPage(i + 1);
+                                    const viewport = page.getViewport({ scale: 2 }); // Adjust scale for higher resolution
+
+                                    // Create a canvas element for rendering
+                                    const canvas = document.createElement('canvas');
+                                    const context = canvas.getContext('2d');
+                                    canvas.width = viewport.width;
+                                    canvas.height = viewport.height;
+
+                                    const renderContext = {
+                                        canvasContext: context,
+                                        viewport: viewport,
+                                    };
+
+                                    // Render the page onto the canvas
+                                    await page.render(renderContext).promise;
+
+                                    // Convert the canvas to a data URL (PNG format)
+                                    const pngDataUrl = canvas.toDataURL('image/png');
+
+                                    // Add the PNG image to the zip file (convert data URL to binary)
+                                    const imgData = pngDataUrl.replace(/^data:image\/(png|jpg);base64,/, "");
+                                    zip.file(originalFileName+`_page_${i + 1}.png`, imgData, { base64: true });
+                                }
+
+                                // Generate the zip file and download it
+                                zip.generateAsync({ type: "blob" }).then((content) => {
+                                    const downloadLink = document.createElement('a');
+                                    downloadLink.href = URL.createObjectURL(content);
+                                    downloadLink.download = originalFileName+"_pdf_images.zip";
+                                    downloadLink.click();
+                                });
+                            }
+
+                            document.getElementById('convertToImage').addEventListener('click', async () => {
+                                let arrayBuffer;
+
+                                if (fileInput.files[0]) {
+                                    arrayBuffer = await fileInput.files[0].arrayBuffer();
+                                } else if (pdfUrl) {
+                                    try {
+                                        arrayBuffer = await fetchPdfFromUrl(pdfUrl);
+                                    } catch (error) {
+                                        alert('Failed to fetch the PDF from the provided URL');
+                                        return;
+                                    }
+                                } else {
+                                    alert('Please upload a PDF file or provide a link to a PDF.');
+                                    return;
+                                }
+
+                                await convertPdfToImagesAsZip(arrayBuffer);
+                            });                            
                         </script>
                     </div>
                 </div>
