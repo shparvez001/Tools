@@ -30,6 +30,86 @@
             border-color: #0056b3;
             background-color: #e7f0ff;
         }
+        #splitRanges, #omitCriteria {
+            width: 250px; 
+            /* height: 50px; 
+            font-size: 16px;  */
+        }
+        #fileNames {
+            margin-top: 10px;
+        }
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .remove-button {
+            cursor: pointer;
+            color: red;
+        }
+        .remove-button:hover {
+            cursor: pointer;
+            color: rgb(0, 68, 255);
+        }
+        .page-selection {
+            width: 250px; 
+            padding: 5px;
+            margin-left: 10px;
+        }
+        .page-selection::placeholder {
+            color: #999; /* Light color for placeholder */
+        }
+        .instruction {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            text-align: center;
+        }
+        .file-input {
+            margin: 10px 0;
+        }
+        .preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 10px 0;
+        }
+        .thumbnail {
+            position: relative;
+            width: 200px; 
+            height: 200px; 
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #d1979771;
+        }
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Preserve aspect ratio */
+        }
+        .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: red;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 2px 6px;
+        }
+        
     </style>
     <title>SHP's PDF Tools</title>
 </head>
@@ -61,11 +141,11 @@
     <br><br><br>
     <div class="container-fluid" style="position: relative">
         <div class="row">
-            <div style="color: blue;" class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+            <div style="color: blue;" class="col-xs-12 col-sm-7 col-md-7 col-lg-7">
                 <div style="background: #dcfba5;" class="container-fluid">
                     <h1>PDF Page Processor</h1>
-                    <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3" style="display: none;"></div>
-                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+                    <!-- <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3" style="display: none;"></div> -->
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                         <!-- Drag and drop upload area -->
                         <div class="drop-zone" id="dropZone">Drag and drop your PDF here or click to upload</div>
                         <input type="file" accept=".pdf,.PDF" id="pdfFile" style="display: none;" />
@@ -76,11 +156,19 @@
                         <label for="omitCriteria">Enter criteria to omit pages (e.g., "blank page"):</label>
                         <input type="text" id="omitCriteria" placeholder="Enter text to omit pages" value="blank page" />
                         <br><br>
+                        <!-- Input field for user to specify split ranges -->
+                        <!-- <input type="file" id="pdfFile" accept="application/pdf"> -->
+                        <label for="splitRanges">Enter page ranges (e.g., "1-3, 5, 7-9; 10-12, 14; 15"):</label>
+                        <input type="text" id="splitRanges" placeholder="e.g.,1-3, 5, 7-9; 10-12; 15">
+                        <br><br>
                         <span  id="pagesOmitted"></span>
                         <br>
                         <button id="processPdf">Process PDF (2-in-1 & Omit Pages)</button>
                         <!--<button id="convertToImage">Convert PDF to Images</button>-->
                         <button id="convertToImage">Convert PDF to Images</button>
+                        <!-- <button id="splitPdf">Split PDF Pages</button>                         -->
+                        <button id="splitButton">Split PDF</button>
+                        <br><br>
                         <!--<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.10.377/build/pdf.min.js"></script>
                         <script src="https://unpkg.com/pdf-lib@1.16.0"></script>-->
                         <script src="js/pdf.min.js"></script>
@@ -348,12 +436,512 @@
                                 }
 
                                 await convertPdfToImagesAsZip(arrayBuffer);
-                            });                            
+                            }); 
+
+// //Split pages
+// document.getElementById('splitPdf').addEventListener('click', async () => {
+//     let arrayBuffer;
+//     let originalFileName = '';
+
+//     // Fetch the PDF from the file input or URL
+//     if (fileInput.files[0]) {
+//         const file = fileInput.files[0];
+//         originalFileName = file.name.split('.pdf')[0];
+//         arrayBuffer = await file.arrayBuffer();
+//     } else if (pdfUrl) {
+//         originalFileName = pdfUrl.split('/').pop();
+//         try {
+//             arrayBuffer = await fetchPdfFromUrl(pdfUrl);
+//         } catch (error) {
+//             alert('Failed to fetch the PDF from the provided URL');
+//             console.error('Fetch error:', error);
+//             return;
+//         }
+//     } else {
+//         alert('Please upload a PDF file or provide a link to a PDF.');
+//         return;
+//     }
+
+//     try {
+//         const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+//         const newPdfDoc = await PDFLib.PDFDocument.create();
+//         newPdfDoc.setTitle(`Split PDF from: ${originalFileName}`);
+
+//         const pageCount = pdfDoc.getPageCount();
+//         console.log(`Page count: ${pageCount}`);
+
+//         for (let i = 0; i < pageCount; i++) {
+//             const page = pdfDoc.getPage(i);
+//             if (!page) {
+//                 console.error(`Page ${i + 1} could not be loaded.`);
+//                 continue;
+//             }
+
+//             // Get the dimensions of the page
+//             const { width, height } = page.getSize();
+//             console.log(`Processing page ${i + 1} with dimensions: width=${width}, height=${height}`);
+
+//             if (isNaN(width) || isNaN(height)) {
+//                 console.error(`Invalid dimensions for page ${i + 1}. Skipping this page.`);
+//                 alert(`Page ${i + 1} has invalid dimensions.`);
+//                 continue;
+//             }
+
+//             // Split each page into two halves
+//             for (let j = 0; j < 2; j++) {
+//                 const splitPage = newPdfDoc.addPage([width / 2, height]);
+                
+//                 try {
+//                     await splitPage.drawPage(page, {
+//                         x: -j * (width / 2),
+//                         y: 0,
+//                         width: width,
+//                         height: height,
+//                     });
+//                     console.log(`Successfully added split part ${j + 1} of page ${i + 1}.`);
+//                 } catch (drawError) {
+//                     console.error(`Error drawing split part ${j + 1} of page ${i + 1}:`, drawError);
+//                 }
+//             }
+//         }
+
+//         const pdfBytes = await newPdfDoc.save();
+//         const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+//         const link = document.createElement('a');
+//         link.href = URL.createObjectURL(blob);
+//         link.download = `${originalFileName}_split.pdf`;
+//         link.click();
+//         console.log('PDF split and download triggered.');
+
+//     } catch (error) {
+//         console.error('An error occurred during PDF processing:', error);
+//         alert('An error occurred while processing the PDF. Please check the console for details.');
+//     }
+// });
+
+
+//Split PDF
+// Parse user-provided page range input
+function parseMultipleParts(input) {
+  const parts = input.split(";").map(part => part.trim());
+  const allRanges = [];
+
+  parts.forEach(part => {
+    const ranges = [];
+    const pages = part.split(",").map(p => p.trim());
+    
+    pages.forEach(page => {
+      if (page.includes("-")) {
+        // Handle range (e.g., "1-5")
+        const [start, end] = page.split("-").map(Number);
+        for (let i = start; i <= end; i++) {
+          ranges.push(i);
+        }
+      } else {
+        // Handle individual page (e.g., "7")
+        ranges.push(Number(page));
+      }
+    });
+
+    allRanges.push([...new Set(ranges)]); // Remove duplicates for this part
+  });
+
+  return allRanges;
+}
+
+// Split PDF into multiple parts
+async function splitPDFIntoParts(pdfBytes, parts,originalFileName) {
+  const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
+  const splitDocs = [];
+
+  for (const ranges of parts) {
+    const newPdfDoc = await PDFLib.PDFDocument.create();
+
+    // Copy pages based on the provided ranges for the current part
+    for (const pageNum of ranges) {
+      const [page] = await newPdfDoc.copyPages(pdfDoc, [pageNum - 1]); // Convert to zero-based index
+      newPdfDoc.addPage(page);
+    }
+
+    splitDocs.push(newPdfDoc); // Store the new PDF document
+  }
+
+  // Save each part and trigger download
+  for (let i = 0; i < splitDocs.length; i++) {
+    const splitBytes = await splitDocs[i].save();
+    const blob = new Blob([splitBytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = originalFileName+`_split_part_${i + 1}.pdf`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+}
+
+// Event listener for the split button
+document.getElementById("splitButton").addEventListener("click", async () => {
+  // Get input parts and file
+  const input = document.getElementById("splitRanges").value;
+  const fileInput = document.getElementById("pdfFile");
+
+  if (!fileInput.files.length) {
+    alert("Please select a PDF file.");
+    return;
+  }
+
+  // Read the file as ArrayBuffer
+  const file = fileInput.files[0];
+  const originalFileName = file.name.split('.pdf')[0];
+  const pdfBytes = await file.arrayBuffer();
+
+  if (!input) {
+    alert("Please enter valid page ranges.");
+    return;
+  }
+
+  // Parse the user input into range objects
+  const pageParts = parseMultipleParts(input);
+
+  try {
+    // Split PDF based on the parts
+    await splitPDFIntoParts(pdfBytes, pageParts, originalFileName);
+  } catch (error) {
+    console.error("Error processing PDF:", error);
+    alert("There was an error processing the PDF. Please ensure it is a valid file.");
+  }
+});
+
+
+
+                      
                         </script>
                     </div>
                 </div>
             </div>
-            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3" style="display: none;"></div>
+            <div class="col-xs-12 col-sm-5 col-md-5 col-lg-5" style="display: block;">
+                <div style="background: #a5fbb8;" class="container-fluid">
+                <h2>Merge PDFs</h2>
+                <input type="file" id="mergeFiles" accept="application/pdf" multiple />
+                <br>
+                <div id="fileNames"></div>
+                <!-- <br>
+                <h4>Select Pages for Merging</h4>
+                <div class="instruction">
+                    Enter the page numbers or ranges (e.g., 1, 2-4) for each PDF.
+                </div> -->
+                <div id="pageSelectionContainer"></div> <!-- Container for page selections -->
+                <br>            
+                <button id="mergeButton">Merge PDFs</button>
+                <br><br>
+                </div>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+                <script>
+                    // Initialize the array to hold selected files for merging
+                    let selectedFiles = [];
+            
+                    // Function to validate page input format
+                    function validatePageInput(pageInputValue) {
+                        const validPattern = /^\d+(-\d+)?(,\s*\d+(-\d+)?)*$/; // Regex for valid input
+                        return validPattern.test(pageInputValue);
+                    }
+            
+                    // Function to update the file display
+                    function updateFileDisplay() {
+                        const fileNamesDiv = document.getElementById('fileNames');
+                        const pageSelectionContainer = document.getElementById('pageSelectionContainer');
+                        fileNamesDiv.innerHTML = '';
+                        pageSelectionContainer.innerHTML = ''; // Clear previous selections
+            
+                        selectedFiles.forEach((file, index) => {
+                            const fileItem = document.createElement('div');
+                            fileItem.className = 'file-item';
+                            fileItem.innerHTML = `
+                                <span>${file.name}</span>
+                                <span class="remove-button" onclick="removeFile(${index})">Remove</span>
+                            `;
+                            fileNamesDiv.appendChild(fileItem);
+            
+                            // Create an input for page selection
+                            const pageInput = document.createElement('input');
+                            pageInput.type = 'text';
+                            pageInput.placeholder = 'Pages (e.g., 1, 2-4)';
+                            pageInput.className = 'page-selection';
+                            pageInput.id = `pageInput-${index}`;
+                            fileNamesDiv.appendChild(pageInput);
+                        });
+                    }
+            
+                    // Function to handle file selection for merging
+                    document.getElementById('mergeFiles').addEventListener('change', function(event) {
+                        const files = Array.from(event.target.files);
+                        selectedFiles.push(...files); // Add new files to the array
+                        updateFileDisplay();
+                    });
+            
+                    // Function to remove a file from the list
+                    function removeFile(index) {
+                        selectedFiles.splice(index, 1); // Remove the file at the specified index
+                        updateFileDisplay();
+                    }
+            
+                    // Function to merge selected pages from PDFs
+                    document.getElementById('mergeButton').addEventListener('click', async () => {
+                        if (selectedFiles.length === 0) {
+                            alert('Please select PDF files to merge.');
+                            return;
+                        }
+            
+                        const pdfDoc = await PDFLib.PDFDocument.create();
+                        const mergeButton = document.getElementById('mergeButton');
+                        mergeButton.disabled = true; // Disable button during processing
+            
+                        try {
+                            for (const [index, file] of selectedFiles.entries()) {
+                                const arrayBuffer = await file.arrayBuffer();
+                                const existingPdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+            
+                                console.log(`Processing file: ${file.name}`); // Debug statement
+            
+                                const pageInput = document.getElementById(`pageInput-${index}`);
+                                if (pageInput.value.length > 0) {
+                                    if (!validatePageInput(pageInput.value)) {
+                                        alert('Invalid page input for ' + file.name);
+                                        return;
+                                    }
+            
+                                    const pageRanges = pageInput.value.split(',').map(range => range.trim());
+                                    for (const range of pageRanges) {
+                                        const [start, end] = range.split('-').map(Number);
+                                        const startIndex = start - 1; // Convert to zero-based index
+                                        const endIndex = end ? end - 1 : startIndex; // Handle single page case
+            
+                                        for (let i = startIndex; i <= endIndex; i++) {
+                                            if (i >= 0 && i < existingPdfDoc.getPageCount()) {
+                                                const [copiedPage] = await pdfDoc.copyPages(existingPdfDoc, [i]);
+                                                pdfDoc.addPage(copiedPage);
+                                            } else {
+                                                console.error(`Page ${i + 1} is out of bounds for file: ${file.name}`);
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    console.warn(`No page input provided for ${file.name}. All pages will be merged.`);
+                                    const pageCount = existingPdfDoc.getPageCount();
+                                    for (let i = 0; i < pageCount; i++) {
+                                        const [copiedPage] = await pdfDoc.copyPages(existingPdfDoc, [i]);
+                                        pdfDoc.addPage(copiedPage);
+                                    }
+                                }
+                            }
+            
+                            const pdfBytes = await pdfDoc.save();
+                            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = 'merged.pdf';
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+            
+                        } catch (error) {
+                            alert('An error occurred while merging the PDFs: ' + error.message);
+                            console.error(error); // Log the error for debugging
+                        } finally {
+                            mergeButton.disabled = false; // Re-enable the button
+                        }
+                    });
+                </script>
+                <!-- OLD code <script>
+                    // Initialize the array to hold selected files for merging
+                    let selectedFiles = [];
+            
+                    // Function to update the file display
+                    function updateFileDisplay() {
+                        const fileNamesDiv = document.getElementById('fileNames');
+                        const pageSelectionContainer = document.getElementById('pageSelectionContainer');
+                        fileNamesDiv.innerHTML = '';
+                        pageSelectionContainer.innerHTML = ''; // Clear previous selections
+            
+                        selectedFiles.forEach((file, index) => {
+                            const fileItem = document.createElement('div');
+                            fileItem.className = 'file-item';
+                            fileItem.innerHTML = `
+                                <span>${file.name}</span>
+                                <span class="remove-button" onclick="removeFile(${index})">Remove</span>
+                            `;
+                            fileNamesDiv.appendChild(fileItem);
+            
+                            // Create an input for page selection
+                            const pageInput = document.createElement('input');
+                            pageInput.type = 'text';
+                            pageInput.placeholder = ' Pages (e.g., 1, 2-4)';
+                            pageInput.className = 'page-selection';
+                            pageInput.id = `pageInput-${index}`;
+                            // pageSelectionContainer.appendChild(pageInput);
+                            pageSelectionContainer.appendChild(pageInput);
+                        });
+                    }
+            
+                    // Function to handle file selection for merging
+                    document.getElementById('mergeFiles').addEventListener('change', function(event) {
+                        const files = Array.from(event.target.files);
+                        selectedFiles.push(...files); // Add new files to the array
+                        updateFileDisplay();
+                    });
+            
+                    // Function to remove a file from the list
+                    function removeFile(index) {
+                        selectedFiles.splice(index, 1); // Remove the file at the specified index
+                        updateFileDisplay();
+                    }
+            
+                    // Function to merge selected pages from PDFs
+                    document.getElementById('mergeButton').addEventListener('click', async () => {
+                        if (selectedFiles.length === 0) {
+                            alert('Please select PDF files to merge.');
+                            return;
+                        }
+            
+                        const pdfDoc = await PDFLib.PDFDocument.create();
+                        for (const [index, file] of selectedFiles.entries()) {
+                            const arrayBuffer = await file.arrayBuffer();
+                            const existingPdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+                            
+                            // Get the selected pages from the input field
+                            const pageInput = document.getElementById(`pageInput-${index}`);
+                            console.log(pageInput.value.length);
+                            
+                            if(pageInput.value.length>0){
+                            const pageRanges = pageInput.value.split(',').map(range => range.trim());
+            
+                            for (const range of pageRanges) 
+                            {
+                                const [start, end] = range.split('-').map(Number);
+                                const startIndex = start - 1; // Convert to zero-based index
+                                const endIndex = end ? end - 1 : startIndex; // Handle single page case
+            
+                                for (let i = startIndex; i <= endIndex; i++) {
+                                    if (i >= 0 && i < existingPdfDoc.getPageCount()) {
+                                        const copiedPage = await pdfDoc.copyPage(existingPdfDoc, i);
+                                        pdfDoc.addPage(copiedPage);
+                                    }
+                                }
+                            }
+                        }
+                        }
+            
+                        const pdfBytes = await pdfDoc.save();
+                        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                        const url = URL.createObjectURL(blob);
+            
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'merged.pdf';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    });
+                </script> -->
+            </div>
+        </div>
+        <div class="row"><br></div>
+        <div class="row">
+            <div style="color: blue;" class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div style="background: #b8eeb6;" class="container-fluid jumbotron">
+                    <div class="container">
+                        <h1>Image to PDF Converter</h1>
+                        <input type="file" id="imageFiles" accept="image/*" multiple class="file-input"/>
+                        <div class="preview" id="previewContainer"></div>
+                        <button id="convertButton">Convert to PDF</button>
+                    </div>
+                </div>
+                <script>
+                    const previewContainer = document.getElementById('previewContainer');
+                    const imageFiles = [];
+                    
+                    document.getElementById('imageFiles').addEventListener('change', handleFileSelect);
+            
+                    function handleFileSelect(event) {
+                        const files = Array.from(event.target.files);
+                        files.forEach((file, index) => {
+                            const fileIndex = imageFiles.length;
+                            imageFiles.push(file);
+            
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                                const thumbnail = document.createElement('div');
+                                thumbnail.classList.add('thumbnail');
+            
+                                const img = document.createElement('img');
+                                img.src = e.target.result;
+                                thumbnail.appendChild(img);
+            
+                                const removeButton = document.createElement('button');
+                                removeButton.classList.add('remove-btn');
+                                removeButton.innerHTML = '×';
+                                removeButton.onclick = () => removeImage(fileIndex, thumbnail);
+                                thumbnail.appendChild(removeButton);
+            
+                                previewContainer.appendChild(thumbnail);
+                            };
+                            reader.readAsDataURL(file);
+                        });
+                    }
+            
+                    function removeImage(index, element) {
+                        imageFiles[index] = null;  // Mark file as removed
+                        previewContainer.removeChild(element);  // Remove the preview thumbnail
+                    }
+            
+                    document.getElementById('convertButton').addEventListener('click', async () => {
+                        const pdfDoc = await PDFLib.PDFDocument.create();
+                        const validImages = imageFiles.filter(file => file !== null);  // Remove null entries
+            
+                        if (validImages.length === 0) {
+                            alert("Please add images to convert.");
+                            return;
+                        }
+            
+                        for (const file of validImages) {
+                            const dataUrl = await fileToDataUrl(file);
+                            const img = await pdfDoc.embedJpg(dataUrl);
+                            const page = pdfDoc.addPage([img.width, img.height]);
+                            page.drawImage(img, {
+                                x: 0,
+                                y: 0,
+                                width: img.width,
+                                height: img.height,
+                            });
+                        }
+            
+                        const pdfBytes = await pdfDoc.save();
+                        download(pdfBytes, "ImagesToPDF.pdf", "application/pdf");
+                    });
+            
+                    async function fileToDataUrl(file) {
+                        return new Promise((resolve, reject) => {
+                            const reader = new FileReader();
+                            reader.onload = () => resolve(reader.result);
+                            reader.onerror = reject;
+                            reader.readAsDataURL(file);
+                        });
+                    }
+            
+                    function download(data, filename, type) {
+                        const blob = new Blob([data], { type });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    }
+                </script>
+            </div>
         </div>
     </div>
 </body>
