@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>OCR Tool with Image Upload and Paste</title>
+  <style>
+    /* Progress bar styling */
+    #progressBarContainer {
+      width: 100%;
+      background-color: #f3f3f3;
+      height: 5px; /* Thinner progress bar */
+      position: fixed; /* Keep it fixed at the top */
+      top: 0;
+      left: 0;
+      z-index: 9999; /* Ensure it stays on top */
+    }
+
+    #progressBar {
+      height: 100%;
+      width: 0;
+      background-color: #4caf50;
+    }
+
+    body {
+      margin-top: 20px; /* To prevent content from being hidden behind the progress bar */
+    }
+
+    #imagePreview {
+      max-width: 100%;
+      display: none;
+      margin-top: 10px;
+    }
+
+    #imagePreviewContainer {
+      margin-top: 10px;
+    }
+
+    #output {
+      margin-bottom: 20px; /* Add space between OCR output and image */
+    }
+  </style>
+</head>
+<body>
+  <h1>JavaScript OCR Tool with Image Upload and Paste</h1>
+  
+  <input type="file" id="fileInput" accept="image/*" />
+  <label for="languageSelect">Choose a language:</label>
+  <select id="languageSelect">
+    <option value="eng">English</option>
+    <option value="ben">Bangla</option>
+    <option value="spa">Spanish</option>
+    <option value="fra">French</option>
+  </select>
+  
+  <button onclick="performOCR()">Start OCR</button>
+  <p>Or paste an image directly from clipboard</p>
+
+  <!-- OCR Output -->
+  <div id="output"></div>
+
+  <!-- Progress bar container -->
+  <div id="progressBarContainer">
+    <div id="progressBar"></div>
+  </div>
+
+  <!-- Image preview -->
+  <div id="imagePreviewContainer">
+    <img id="imagePreview" />
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
+  <script>
+    // Variable to hold the image from clipboard
+    let imageFromClipboard = null;
+
+    // Handle file input or clipboard paste
+    function performOCR() {
+      const fileInput = document.getElementById('fileInput');
+      const languageSelect = document.getElementById('languageSelect');
+      const output = document.getElementById('output');
+      const progressBar = document.getElementById('progressBar');
+
+      // Clear previous progress bar
+      progressBar.style.width = '0%';
+
+      if (fileInput.files.length === 0 && !imageFromClipboard) {
+        output.innerHTML = 'Please select an image file or paste an image from the clipboard.';
+        return;
+      }
+
+      const selectedLanguage = languageSelect.value;
+      let imageFile;
+
+      // If image was pasted, use that; otherwise, use file input image
+      if (imageFromClipboard) {
+        imageFile = imageFromClipboard; // Image from clipboard
+        console.log("Using image from clipboard...");
+      } else {
+        imageFile = fileInput.files[0]; // Image from file input
+        console.log("Using image from file input...");
+      }
+
+      const reader = new FileReader();
+
+      reader.onload = function (e) {
+        const imageData = e.target.result;
+
+        console.log("Image data loaded:", imageData); // Log the image data
+
+        Tesseract.recognize(imageData, selectedLanguage, {
+          logger: m => {
+            console.log(m); // Log the progress details as received from Tesseract.js
+
+            if (m.status === 'recognizing text') {
+              // Update progress bar
+              let progress = Math.round(m.progress * 100);
+              progressBar.style.width = progress + '%';
+
+              // Log progress at each step
+              console.log(`OCR Progress: ${progress}%`);
+            }
+          },
+        }).then(({ data }) => {
+          // Clear output area
+          output.innerHTML = '';
+
+          // Loop through each line in the recognized data
+          data.lines.forEach(line => {
+            const p = document.createElement('p');
+            p.textContent = line.text;
+            output.appendChild(p); // Add each line as a new paragraph
+          });
+
+          console.log("OCR completed successfully.");  // Log completion
+        }).catch(err => {
+          output.innerHTML = 'Error: ' + err.message;
+          console.error("OCR Error:", err); // Log the OCR error
+        });
+      };
+
+      reader.onerror = function (err) {
+        console.error("Error reading image:", err);
+        output.innerHTML = 'Error: Unable to read the image file.';
+      };
+
+      reader.readAsDataURL(imageFile); // Read the image file as a data URL
+    }
+
+    // Handle image pasted from clipboard
+    document.addEventListener('paste', function(e) {
+      const clipboardItems = e.clipboardData.items;
+      for (let i = 0; i < clipboardItems.length; i++) {
+        const item = clipboardItems[i];
+        if (item.type.indexOf('image') !== -1) {
+          // Use getAsFile instead of getAsBlob
+          const file = item.getAsFile();
+          if (file) {
+            imageFromClipboard = file; // Store the image from clipboard
+            displayImagePreview(file); // Show the preview
+            document.getElementById('output').innerHTML = 'Image pasted successfully. Click "Start OCR" to process the image.';
+          }
+          break;
+        }
+      }
+    });
+
+    // Display the image preview
+    function displayImagePreview(imageFile) {
+      const previewContainer = document.getElementById('imagePreviewContainer');
+      const imagePreview = document.getElementById('imagePreview');
+
+      const reader = new FileReader();
+
+      reader.onload = function (e) {
+        imagePreview.src = e.target.result;
+        imagePreview.style.display = 'block'; // Show the preview image
+      };
+
+      reader.readAsDataURL(imageFile); // Read the image file to display preview
+    }
+
+    // Handle file input and show preview
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        imageFromClipboard = file; // Store the image from the input
+        displayImagePreview(file); // Show the preview
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>-->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap-theme.min.css">
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Global styling */
+        body {
+          font-family: 'Roboto', sans-serif;
+          /* background-image: url("img/back.jpg"); */
+          background: linear-gradient(45deg,rgba(118, 8, 245, 0.3), rgba(211, 12, 12, 0.3));
+          margin: 0;
+          padding: 0;
+          color: #333;
+          display: block;
+          /* flex-direction: column;
+          justify-content: flex-start; */
+          align-items: center;
+          min-height: 100vh;
+        }
+
+        .glass {
+            opacity: 0.95;
+            border-radius: 12px; 
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+            backdrop-filter: blur(10px); /* Optional: adds a blur effect to the background */
+            margin-top: 20px;
+            margin-bottom: 20px;
+            /* color: #fff; */
+        }
+    
+        h1 {
+          font-size: 2.5rem;
+          color: #333;
+          margin-top: 30px;
+          text-align: center;
+        }
+    
+        /* Form and Input Elements */
+        .container {
+          width: 100%;
+          max-width: 1400px;
+          min-width: 400px;
+          background: rgba(255, 255, 255, 0.8);
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+          /* margin: 20px; */
+          margin-top: 20px;
+          margin-bottom: 20px;
+        }
+    
+        .input-group {
+          margin-bottom: 20px;
+          display: flex;
+          flex-direction: column;
+        }
+    
+        label {
+          font-weight: 500;
+          margin-bottom: 5px;
+        }
+    
+        input[type="file"],
+        select,
+        button {
+          padding: 10px;
+          font-size: 1rem;
+          border-radius: 4px;
+          border: 1px solid #ddd;
+          outline: none;
+          transition: all 0.3s ease;
+        }
+    
+        input[type="file"],
+        select {
+          width: 100%;
+        }
+    
+        button {
+          background-color: rgba(76, 175, 80, 0.7);
+          color: white;
+          border: none;
+          cursor: pointer;
+          font-weight: 500;
+          width: 100%;
+          transition: background-color 0.3s ease;
+        }
+    
+        button:hover {
+          background-color: rgba(76, 175, 80, 1);
+        }
+    
+        /* Progress bar styling */
+        #progressBarContainer {
+          width: 100%;
+          background-color: #e0e0e0;
+          height: 5px;
+          border-radius: 3px;
+          position: fixed;
+          top: 0;
+          left: 0;
+          z-index: 9999; 
+        }
+    
+        #progressBar {
+          height: 100%;
+          width: 0;
+          background-color: #4caf50;
+          border-radius: 3px;
+        }
+    
+        /* OCR Output */
+        #output {
+          margin-top: 20px;
+          margin-bottom: 20px;
+          width: 100%;
+          max-width: 1400px;
+          min-width: 400px;
+          padding: 20px;
+          background-color: rgba(255, 255, 255, 0.9);
+          border-radius: 8px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+          color: #333;
+          word-wrap: break-word;
+        }
+    
+        #output p {
+          font-size: 1.5rem;
+          margin-bottom: 10px;
+        }
+    
+        /* Image Preview */
+        #imagePreviewContainer {
+          margin-top: 20px;
+          margin-bottom: 20px;
+          text-align: center;
+          background: rgba(255, 255, 255, 0.9); 
+          /* padding: 10px; */
+          border-radius: 8px;
+        }
+    
+        #imagePreview {
+          max-width: 100%;
+          max-height: 800px;
+          margin-top: 20px;
+          margin-bottom: 20px;
+          border-radius: 8px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+          object-fit: contain;
+        }
+    
+        /* Button container for file input or clipboard */
+        #imageUploadOrPaste {
+          display: flex;
+          justify-content: center;
+          margin-top: 20px;
+          font-size: 1rem;
+        }
+    
+        #imageUploadOrPaste button {
+          background-color: #2196F3;
+          margin: 0 10px;
+        }
+    
+        #imageUploadOrPaste button:hover {
+          background-color: #1976D2;
+        }
+      </style>
+    <title>SHP's OCR Tools</title>
+    <link rel="icon" type="image/x-icon" href="img/favicon.png">
+</head>
+
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"><img src="img/logo.png" alt="SHP's Most used toolset" height="30"></a>
+        </div>
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li><a href="/">Home</a></li>
+                <li><a href="pdfTools.html">PDF Tools</a></li>
+                <li><a href="resistor.html">Resistance</a></li>
+                <li><a href="capacitor.html">Capacitance</a></li>
+                <li><a href="terminalVelocity.html">Terminal Velocity</a></li>
+                <li><a href="math.html">Math Tools</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<body>
+    <br><br><br>
+    <div class="container-fluid" style="position: relative">
+        <div class="row">
+            <div style="color: blue;" class="col-xs-12 col-sm-12 col-md-7 col-lg-7">
+                <div style="background: #dcfba5;" class="container-fluid glass">
+                    <h1>OCR Tool</h1>
+                    <!-- <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3" style="display: none;"></div> -->
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <!-- Main container for file input and OCR options -->
+                        <div class="container">
+                            <div class="input-group">
+                            <label for="fileInput">Select an image to extract text</label>
+                            <input type="file" id="fileInput" accept="image/*" />
+                            </div>
+
+                            <div class="input-group">
+                            <label for="languageSelect">Choose a language</label>
+                            <select id="languageSelect">
+                                <option value="eng">English</option>
+                                <option value="ben">Bangla</option>
+                                <option value="spa">Spanish</option>
+                                <option value="fra">French</option>
+                            </select>
+                            </div>
+
+                            <div id="imageUploadOrPaste">
+                            <button onclick="performOCR()">Start OCR</button>
+                            </div>
+
+                            <p>Or paste an image directly from clipboard</p>
+                        </div>
+
+                        
+
+                        <!-- Output for OCR text -->
+                        <div id="output">After OCR is finished output will apprear here. OCR may take time depending on the complexity of image.</div>    
+                    </div>
+                </div>
+            </div>
+            <!-- Progress bar -->
+            <div id="progressBarContainer">
+              <div id="progressBar"></div>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5" style="display: block;">
+                <div style="background: #a5fbb8;" class="container-fluid glass">
+                <!-- Image preview container -->
+                <div id="imagePreviewContainer">
+                  <!-- Initial blank canvas for preview -->
+                  <canvas id="imageCanvas" style="display: block; width: 100%; height: 400px;"></canvas>
+              
+                  <!-- Image preview will be shown here after selecting an image -->
+                  <img id="imagePreview"/>
+              </div>
+                </div>
+            </div>
+        </div>
+<!-- Including Tesseract.js -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
+<script>
+  // Variable to hold the image from clipboard
+  let imageFromClipboard = null;
+
+  // Handle file input or clipboard paste
+  function performOCR() {
+    const fileInput = document.getElementById('fileInput');
+    const languageSelect = document.getElementById('languageSelect');
+    const output = document.getElementById('output');
+    const progressBar = document.getElementById('progressBar');
+
+    // Clear previous progress bar
+    progressBar.style.width = '0%';
+
+    if (fileInput.files.length === 0 && !imageFromClipboard) {
+      output.innerHTML = 'Please select an image file or paste an image from the clipboard.';
+      return;
+    }
+
+    const selectedLanguage = languageSelect.value;
+    let imageFile;
+
+    // If image was pasted, use that; otherwise, use file input image
+    if (imageFromClipboard) {
+      imageFile = imageFromClipboard; // Image from clipboard
+      console.log("Using image from clipboard...");
+    } else {
+      imageFile = fileInput.files[0]; // Image from file input
+      console.log("Using image from file input...");
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+      const imageData = e.target.result;
+
+      console.log("Image data loaded:", imageData); // Log the image data
+
+      Tesseract.recognize(imageData, selectedLanguage, {
+        logger: m => {
+          console.log(m); // Log the progress details as received from Tesseract.js
+
+          if (m.status === 'recognizing text') {
+            // Update progress bar
+            let progress = Math.round(m.progress * 100);
+            progressBar.style.width = progress + '%';
+
+            // Log progress at each step
+            console.log(`OCR Progress: ${progress}%`);
+          }
+        },
+      }).then(({ data }) => {
+        // Clear output area
+        output.innerHTML = '';
+
+        // Loop through each line in the recognized data
+        data.lines.forEach(line => {
+          const p = document.createElement('p');
+          p.textContent = line.text;
+          output.appendChild(p); // Add each line as a new paragraph
+        });
+
+        console.log("OCR completed successfully.");  // Log completion
+      }).catch(err => {
+        output.innerHTML = 'Error: ' + err.message;
+        console.error("OCR Error:", err); // Log the OCR error
+      });
+    };
+
+    reader.onerror = function (err) {
+      console.error("Error reading image:", err);
+      output.innerHTML = 'Error: Unable to read the image file.';
+    };
+
+    reader.readAsDataURL(imageFile); // Read the image file as a data URL
+  }
+
+  // Handle image pasted from clipboard
+  document.addEventListener('paste', function(e) {
+    const clipboardItems = e.clipboardData.items;
+    for (let i = 0; i < clipboardItems.length; i++) {
+      const item = clipboardItems[i];
+      if (item.type.indexOf('image') !== -1) {
+        // Use getAsFile instead of getAsBlob
+        const file = item.getAsFile();
+        if (file) {
+          imageFromClipboard = file; // Store the image from clipboard
+          displayImagePreview(file); // Show the preview
+          document.getElementById('output').innerHTML = 'Image pasted successfully. Click "Start OCR" to process the image.';
+        }
+        break;
+      }
+    }
+  });
+
+  // Display the image preview
+  function displayImagePreview(imageFile) {
+    const previewContainer = document.getElementById('imagePreviewContainer');
+    const imagePreview = document.getElementById('imagePreview');
+    const imageCanvas = document.getElementById('imageCanvas');
+
+    // Hide the canvas and show the image preview
+    imageCanvas.style.display = 'none';
+    imagePreview.style.display = 'block';
+
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+      imagePreview.src = e.target.result;
+      imagePreview.style.display = 'block'; // Show the preview image
+
+      // Optional: if you want to display the image on a canvas as well, you can do that here:
+      const img = new Image();
+        img.onload = function() {
+            const ctx = imageCanvas.getContext('2d');
+            imageCanvas.width = img.width;
+            imageCanvas.height = img.height;
+            ctx.drawImage(img, 0, 0); // Draw image on canvas if needed
+        };
+        img.src = e.target.result;
+    };
+
+    reader.readAsDataURL(imageFile); // Read the image file to display preview
+  }
+
+  // Handle file input and show preview
+  document.getElementById('fileInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      imageFromClipboard = file; // Store the image from the input
+      displayImagePreview(file); // Show the preview
+    }
+  });
+  
+  // Function to draw a placeholder on the canvas
+function drawOnCanvas() {
+    const canvas = document.getElementById('imageCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Set the canvas dimensions
+    canvas.width = 600;
+    canvas.height = 400;
+
+    // Draw a fancy background gradient
+    let gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    gradient.addColorStop(0, 'rgba(255, 150, 150, 0.8)'); // Start color (pink)
+    gradient.addColorStop(1, 'rgba(0, 204, 255, 0.8)'); // End color (blue)
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height); // Fill the canvas with gradient background
+
+    // Draw a fancy circle with shadow
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+    ctx.shadowBlur = 15;
+    ctx.shadowOffsetX = 10;
+    ctx.shadowOffsetY = 10;
+    ctx.beginPath();
+    ctx.arc(300, 200, 100, 0, Math.PI * 2, false);
+    ctx.fillStyle = '#ffe5d6'; // Circle fill color
+    ctx.fill();
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = '#fffcfa'; // Border color
+    ctx.stroke();
+
+    // Draw a curved Bezier line
+    // ctx.beginPath();
+    // ctx.moveTo(50, 350);
+    // ctx.bezierCurveTo(150, 250, 450, 250, 550, 350);
+    // ctx.lineWidth = 2;
+    // ctx.strokeStyle = 'white';
+    // ctx.stroke();
+
+    // Draw fancy text with a shadow effect
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+    ctx.shadowBlur = 5;
+    ctx.font = '20px Arial';
+    ctx.fillStyle = '#fff';
+    ctx.fillText('Select an image to preview here', 150, 80);
+
+    // Draw a border around the canvas
+    // ctx.strokeStyle = '#aaa';  // Border color
+    // ctx.lineWidth = 2;
+    // ctx.strokeRect(0, 0, canvas.width, canvas.height);
+
+    // Draw placeholder text
+    // ctx.font = '20px Arial';
+    // ctx.fillStyle = '#555';
+    // ctx.fillText('Select an image to preview here', 150, 150);
+
+}
+
+// Call the function to draw on the canvas when the page loads
+window.onload = function() {
+    drawOnCanvas();
+};
+</script>        
+    </div>
+</body>
+
+</html>
