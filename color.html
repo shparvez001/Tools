@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Hex with Swatch and Text Preview</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 800px;
+            display: flex;
+            gap: 20px;
+        }
+
+        /* Left Column for Input */
+        .input-section {
+            flex: 1;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .color-inputs {
+            margin-top: 20px;
+        }
+
+        .color-inputs input {
+            width: 80%;
+            padding: 8px;
+            margin-top: 10px;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .color-preview {
+            margin-top: 20px;
+            width: 100%;
+            height: 100px;
+            border-radius: 8px;
+        }
+
+        /* Right Column for Output */
+        .output-section {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Swatch Section */
+        .swatch-section {
+            text-align: center;
+        }
+
+        .swatch-container {
+            display: flex;
+            /* justify-content: space-around; */
+            justify-content: center;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            gap: 0px;
+        }
+
+        .swatch {
+            width: 75px;
+            height: 75px;
+            border-radius: 0px;
+            border: 0px solid #ddd;
+            cursor: pointer;
+        }
+
+        .swatch-info {
+            font-size: 15px;
+            margin-top: 5px;
+            color: #000000;
+        }
+
+        /* Text Preview Section */
+        .text-preview-section {
+            text-align: center;
+        }
+
+        .text-preview-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .text-preview {
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                width: 100%;
+                padding: 10px;
+            }
+            .input-section, .output-section {
+                flex: none;
+                width: 100%;
+                margin-bottom: 20px;
+            }
+        }
+                
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Input Section -->
+        <div class="input-section">
+            <h1>Color Picker</h1>
+            <div class="color-inputs">
+                <input type="color" id="colorPicker" value="#ff0000">
+                <div>
+                    <label for="hex">Hex:</label>
+                    <input type="text" id="hex" value="#ff0000" readonly>
+                </div>
+                <div>
+                    <label for="rgb">RGB:</label>
+                    <input type="text" id="rgb" value="rgb(255, 0, 0)" readonly>
+                </div>
+                <div>
+                    <label for="hsl">HSL:</label>
+                    <input type="text" id="hsl" value="hsl(0, 100%, 50%)" readonly>
+                </div>
+            </div>
+            <div id="colorPreview" class="color-preview"></div>
+        </div>
+
+        <!-- Output Section -->
+        <div class="output-section">
+            <!-- Swatch Section -->
+            <div class="swatch-section">
+                <h2>Color Swatch</h2>
+                <div id="swatchContainer" class="swatch-container"></div>
+            </div>
+
+            <!-- Text Preview Section -->
+            <div class="text-preview-section">
+                <h2>Text Preview</h2>
+                <div id="textPreviewContainer" class="text-preview-container"></div>
+            </div>
+            <div class="swatch-section">
+                <h2>Triadic Colors</h2>
+                <div id="triadicContainer" class="swatch-container"></div>
+            </div>
+            <div class="swatch-section">
+                <h2>Monochromatic Colors</h2>
+                <div id="monochromaticContainer" class="swatch-container"></div>
+            </div>
+            <div class="swatch-section">
+                <h2>Shades</h2>
+                <div id="shadesContainer" class="swatch-container"></div>
+            </div>
+            <div class="swatch-section">
+                <h2>Tints</h2>
+                <div id="tintsContainer" class="swatch-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('colorPicker').addEventListener('input', updateColor);
+
+        function updateColor(event) {
+            const colorHex = event.target.value || "#ff0000";
+            const rgb = hexToRgb(colorHex);
+            const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+
+            // Update displayed color values
+            document.getElementById('hex').value = colorHex;
+            document.getElementById('rgb').value = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+            document.getElementById('hsl').value = `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
+
+            // Update color preview box
+            document.getElementById('colorPreview').style.backgroundColor = colorHex;
+
+            // Update color swatch and text preview
+            generateSwatches(hsl);
+            generateColorSchemes(hsl);
+            //updateUrlWithHex(colorHex);
+            window.location.hash=colorHex;
+        }
+
+        // Function to update the URL with the current hex color
+    function updateUrlWithHex(colorHex) {
+        // Update the URL to include the selected color with #
+        const url = new URL(window.location);
+        url.searchParams.set('color', colorHex); // Set the color as the query parameter
+        window.history.pushState({}, '', url);
+        }
+
+        // Hex to RGB conversion
+        function hexToRgb(hex) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return { r, g, b };
+        }
+
+        // RGB to HSL conversion
+        function rgbToHsl(r, g, b) {
+            r /= 255;
+            g /= 255;
+            b /= 255;
+
+            let max = Math.max(r, g, b);
+            let min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+
+            if (max === min) {
+                h = s = 0; // achromatic
+            } else {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            }
+
+            return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+        }
+
+        // HSL to Hex conversion
+        function hslToHex(h, s, l) {
+            s /= 100;
+            l /= 100;
+
+            const c = (1 - Math.abs(2 * l - 1)) * s;
+            const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+            const m = l - c / 2;
+
+            let r = 0, g = 0, b = 0;
+
+            if (0 <= h && h < 60) { r = c; g = x; b = 0; }
+            else if (60 <= h && h < 120) { r = x; g = c; b = 0; }
+            else if (120 <= h && h < 180) { r = 0; g = c; b = x; }
+            else if (180 <= h && h < 240) { r = 0; g = x; b = c; }
+            else if (240 <= h && h < 300) { r = x; g = 0; b = c; }
+            else if (300 <= h && h < 360) { r = c; g = 0; b = x; }
+
+            r = Math.round((r + m) * 255);
+            g = Math.round((g + m) * 255);
+            b = Math.round((b + m) * 255);
+
+            return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+        }
+
+        // Generate swatch colors based on HSL input
+        function generateSwatches(hsl) {
+            const swatchContainer = document.getElementById('swatchContainer');
+            const textPreviewContainer = document.getElementById('textPreviewContainer');
+            swatchContainer.innerHTML = ''; // Clear previous swatches
+            textPreviewContainer.innerHTML = ''; // Clear previous text previews
+
+            // Calculate complementary and analogous colors
+            const colors = [
+                { label: "Complementary", h: (hsl.h + 180) % 360, s: hsl.s, l: hsl.l },
+                { label: "Analogous 1", h: (hsl.h + 30) % 360, s: hsl.s, l: hsl.l },
+                { label: "Analogous 2", h: (hsl.h - 30 + 360) % 360, s: hsl.s, l: hsl.l }
+            ];
+
+            colors.forEach(color => {
+                const colorHex = hslToHex(color.h, color.s, color.l);
+
+                // Create swatch box
+                const swatch = document.createElement('div');
+                swatch.className = 'swatch';
+                swatch.style.backgroundColor = colorHex;
+                swatch.title = `${color.label}: ${colorHex}`;
+
+                const swatchInfo = document.createElement('div');
+                swatchInfo.className = 'swatch-info';
+                swatchInfo.innerText = colorHex;
+
+                const swatchBox = document.createElement('div');
+                swatchBox.appendChild(swatch);
+                swatchBox.appendChild(swatchInfo);
+
+                swatchContainer.appendChild(swatchBox);
+
+                // Create text preview box
+                const textPreview = document.createElement('div');
+                textPreview.className = 'text-preview';
+                textPreview.style.backgroundColor = document.getElementById('colorPicker').value;
+                textPreview.style.color = colorHex;
+                textPreview.innerText = `Text in ${colorHex}`;
+
+                textPreviewContainer.appendChild(textPreview);
+            });
+        }
+
+        function generateColorSchemes(hsl) {
+            generateTriadicColors(hsl);
+            generateMonochromaticColors(hsl);
+            generateShadesAndTints(hsl);
+        }
+
+        function generateTriadicColors(hsl) {
+            const triadicContainer = document.getElementById('triadicContainer');
+            triadicContainer.innerHTML = '';
+            const colors = [
+                { h: (hsl.h + 120) % 360, s: hsl.s, l: hsl.l },
+                { h: (hsl.h + 240) % 360, s: hsl.s, l: hsl.l }
+            ];
+            colors.forEach(color => addSwatch(triadicContainer, hslToHex(color.h, color.s, color.l)));
+        }
+
+        function generateMonochromaticColors(hsl) {
+            const monochromaticContainer = document.getElementById('monochromaticContainer');
+            monochromaticContainer.innerHTML = '';
+            for (let i = -2; i <= 2; i++) {
+                addSwatch(monochromaticContainer, hslToHex(hsl.h, hsl.s, Math.min(100, Math.max(0, hsl.l + i * 10))));
+            }
+        }
+
+        function generateShadesAndTints(hsl) {
+            const shadesContainer = document.getElementById('shadesContainer');
+            const tintsContainer = document.getElementById('tintsContainer');
+            shadesContainer.innerHTML = '';
+            tintsContainer.innerHTML = '';
+
+            for (let i = 1; i <= 5; i++) {
+                addSwatch(shadesContainer, hslToHex(hsl.h, hsl.s, Math.max(0, hsl.l - i * 10)));
+                addSwatch(tintsContainer, hslToHex(hsl.h, hsl.s, Math.min(100, hsl.l + i * 10)));
+            }
+        }
+
+        function addSwatch(container, color) {
+            const swatch = document.createElement('div');
+            swatch.className = 'swatch';
+            swatch.style.backgroundColor = color;
+            swatch.title = `${color.label}: ${color}`;
+
+            const swatchInfo = document.createElement('div');
+            swatchInfo.className = 'swatch-info';
+            swatchInfo.innerText = color;
+
+            const swatchBox = document.createElement('div');
+            swatchBox.appendChild(swatch);
+            swatchBox.appendChild(swatchInfo);
+
+            container.appendChild(swatchBox);
+
+            //swatch.textContent = color;
+            //container.appendChild(swatch);
+        }
+
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            //let colorFromUrl = urlParams.get('color') || '#ff0000';  // Default to #ff0000 if no color is in the URL
+            let colorFromUrl =window.location.hash;
+            
+            // Decode the %23 back to #
+            colorFromUrl = colorFromUrl.replace('%23', '#');
+            
+            // Set color picker to URL color
+            document.getElementById('colorPicker').value = colorFromUrl;  
+            
+            // Initialize with color from URL
+            updateColor({ target: { value: colorFromUrl } });
+        };
+        
+    </script>
+</body>
+</html>
