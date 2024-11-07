@@ -150,6 +150,36 @@
             border-radius: 4px;
             font-weight: bold;
         }
+
+        .color-palette {
+            display: flex;
+            gap: 0px;
+            margin-top: 0px;
+            justify-content: center;
+        }
+
+        .palette-color {
+            width: 50px;
+            height: 50px;
+            border-radius: 0px;
+            border: none;
+            cursor: pointer;
+            outline: none;
+        }
+
+        #userPalette {
+            margin-top: 0px;
+        }
+
+        #savedColors {
+            display: flex;
+            gap: 0px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+          
+
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
@@ -214,7 +244,30 @@
                     <input type="text" id="hsl" value="hsl(0, 100%, 50%)" readonly>
                 </div>
             </div>
+            <br>
+            <button id="saveColor">Save Color to Palette</button>
+            <button id="clearPalette">Clear Palette</button>
             <div id="colorPreview" class="color-preview"></div>
+            <br>
+            <p>Common Colors</p>
+            <!-- Add color palette here -->
+            <div id="colorPalette" class="color-palette">
+                <button class="palette-color" style="background-color: #ff0000;" data-color="#ff0000"></button>
+                <button class="palette-color" style="background-color: #00ff00;" data-color="#00ff00"></button>
+                <button class="palette-color" style="background-color: #0000ff;" data-color="#0000ff"></button>
+                <button class="palette-color" style="background-color: #ffff00;" data-color="#ffff00"></button>
+                <button class="palette-color" style="background-color: #ff00ff;" data-color="#ff00ff"></button>
+                <button class="palette-color" style="background-color: #00ffff;" data-color="#00ffff"></button>
+                <button class="palette-color" style="background-color: #99b1b1;" data-color="#99b1b1"></button>
+                <!-- Add more colors as needed -->
+            </div>
+            <br>
+            <p>Saved Colors</p>
+            <!-- Section for user-defined color palette -->
+            <div id="userPalette" class="color-palette">                
+                <div id="savedColors">When you save colors, they will appear here.</div>
+            </div>
+
         </div>
 
         <!-- Output Section -->
@@ -470,6 +523,15 @@
             //container.appendChild(swatch);
         }
 
+        // Initialize color palette functionality
+        document.querySelectorAll('.palette-color').forEach(button => {
+            button.addEventListener('click', (event) => {
+                const colorHex = event.target.getAttribute('data-color');
+                document.getElementById('colorPicker').value = colorHex; // Update color picker
+                updateColor({ target: { value: colorHex } }); // Call updateColor function
+            });
+        });
+
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             //let colorFromUrl = urlParams.get('color') || '#ff0000';  // Default to #ff0000 if no color is in the URL
@@ -481,12 +543,70 @@
             if (colorFromUrl && /^#[0-9A-F]{6}$/i.test(colorFromUrl)) {
                 // Set color picker to URL color
                 document.getElementById('colorPicker').value = colorFromUrl;  
-                colorFromUrl.log(colorFromUrl);
+                console.log(colorFromUrl);
             }
             
             // Initialize with color from URL
             updateColor({ target: { value: colorFromUrl } });
         };
+
+        // Initialize saved colors from localStorage
+        const savedColorsContainer = document.getElementById('savedColors');
+        let savedColors = JSON.parse(localStorage.getItem('userPalette')) || [];
+
+        // Function to display saved colors
+        function displaySavedColors() {
+            if(savedColors.length>0)
+            {
+                savedColorsContainer.innerHTML = '';
+                savedColors.forEach(color => {
+                    const colorButton = document.createElement('button');
+                    colorButton.className = 'palette-color';
+                    colorButton.style.backgroundColor = color;
+                    colorButton.setAttribute('data-color', color);
+
+                    // Event listener to select color from palette
+                    colorButton.addEventListener('click', () => {
+                        document.getElementById('colorPicker').value = color;
+                        updateColor({ target: { value: color } });
+                    });
+
+                    savedColorsContainer.appendChild(colorButton);
+                });
+            }
+            else{
+                savedColorsContainer.innerHTML = 'When you save colors, they will appear here.';
+            }
+        }
+
+        // Function to save the current color to the palette
+        function saveColorToPalette() {
+            const color = document.getElementById('colorPicker').value;
+
+            if (!savedColors.includes(color)) {
+                savedColors.push(color);
+                localStorage.setItem('userPalette', JSON.stringify(savedColors));
+                displaySavedColors();
+            } else {
+                alert("This color is already in your palette!");
+            }
+        }
+
+        // Event listener for the Save Color button
+        document.getElementById('saveColor').addEventListener('click', saveColorToPalette);
+
+        // Display saved colors on load
+        displaySavedColors();   
+
+        // Function to clear all saved colors
+        function clearColorPalette() {
+            savedColors = [];
+            localStorage.removeItem('userPalette');
+            displaySavedColors();
+        }
+
+        // Event listener for the Clear Palette button
+        document.getElementById('clearPalette').addEventListener('click', clearColorPalette);             
         
     </script>
 </body>
