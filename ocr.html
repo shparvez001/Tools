@@ -75,8 +75,17 @@
         }
     
         input[type="file"],
-        select,
-        button {
+        select {
+          padding: 10px;
+          font-size: 1rem;
+          border-radius: 4px;
+          border: 1px solid #ddd;
+          outline: none;
+          transition: all 0.3s ease;
+        }
+
+        
+        .ocr-button {
           padding: 10px;
           font-size: 1rem;
           border-radius: 4px;
@@ -90,8 +99,8 @@
           width: 100%;
         }
     
-        button {
-          background-color: rgba(76, 175, 80, 0.7);
+        .ocr-button {
+          background-color: #4caf50b3;
           color: white;
           border: none;
           cursor: pointer;
@@ -100,7 +109,7 @@
           transition: background-color 0.3s ease;
         }
     
-        button:hover {
+        .ocr-button:hover {
           background-color: rgba(76, 175, 80, 1);
         }
     
@@ -236,7 +245,7 @@
                             </div>
 
                             <div id="imageUploadOrPaste">
-                            <button onclick="performOCR()">Start OCR</button>
+                            <button onclick="performOCR()" class="ocr-button">Start OCR</button>
                             </div>
 
                             <p>Or paste an image directly from clipboard</p>
