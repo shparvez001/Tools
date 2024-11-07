@@ -3,12 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Color Hex with Swatch and Text Preview</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap-theme.min.css">
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: Roboto, sans-serif;
+            background: linear-gradient(45deg,rgba(118, 8, 245, 0.3), rgba(211, 12, 12, 0.3));
             margin: 0;
             padding: 0;
+            color: #333;
             display: grid;
             justify-content: center;
             align-items: center;
@@ -16,12 +23,24 @@
             background-color: #f4f4f4;
         }
 
+        .glass {
+            opacity: 0.95;
+            border-radius: 12px; 
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+            backdrop-filter: blur(10px); /* Optional: adds a blur effect to the background */
+            margin-top: 20px;
+            margin-bottom: 20px;
+            /* color: #fff; */
+        }
+
         .container {
             background-color: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            width: 800px;
+            /* width: 800px; */
+            width: 90vw;
             display: flex;
             gap: 20px;
         }
@@ -30,6 +49,7 @@
         .input-section {
             flex: 1;
             text-align: center;
+            min-width: 33%;
         }
 
         h1 {
@@ -60,6 +80,13 @@
         /* Right Column for Output */
         .output-section {
             flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .output-section-2 {
+            flex: 3;
             display: flex;
             flex-direction: column;
             gap: 20px;
@@ -115,7 +142,7 @@
                 width: 100%;
                 padding: 10px;
             }
-            .input-section, .output-section {
+            .input-section, .output-section, .output-section-2 {
                 flex: none;
                 width: 100%;
                 margin-bottom: 20px;
@@ -123,9 +150,38 @@
         }
                 
     </style>
+    <title>SHP's Color Tools</title>
+    <link rel="icon" type="image/x-icon" href="img/favicon.png">
 </head>
+
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"><img src="img/logo.png" alt="SHP's Most used toolset" height="30"></a>
+        </div>
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li><a href="/">Home</a></li>
+                <li><a href="pdfTools.html">PDF Tools</a></li>
+                <li><a href="ocr.html">OCR</a></li>
+                <li><a href="resistor.html">Resistance</a></li>
+                <li><a href="capacitor.html">Capacitance</a></li>
+                <li><a href="terminalVelocity.html">Terminal Velocity</a></li>
+                <li><a href="math.html">Math Tools</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
 <body>
-    <div class="container">
+    <br><br><br>
+    <div class="container glass" style="background: #dcfba5;" >
         <!-- Input Section -->
         <div class="input-section">
             <h1>Color Picker</h1>
@@ -160,6 +216,8 @@
                 <h2>Text Preview</h2>
                 <div id="textPreviewContainer" class="text-preview-container"></div>
             </div>
+        </div>
+        <div class="output-section-2">
             <div class="swatch-section">
                 <h2>Triadic Colors</h2>
                 <div id="triadicContainer" class="swatch-container"></div>
