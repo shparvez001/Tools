@@ -1,61 +1,171 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/bootstrap-theme.min.css">
+  <script src="js/jquery.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: Roboto, sans-serif;
+      background: linear-gradient(45deg, rgba(118, 8, 245, 0.3), rgba(211, 12, 12, 0.3));
+      margin: 0;
+      padding: 0;
+      color: #333;
+      display: grid;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f4f4f4;
+    }
 
-    <link rel="stylesheet" href="css/bootstrap.min.css">
-    <link rel="stylesheet" href="css/bootstrap-theme.min.css">
-    <script src="js/jquery.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">    
+    .glass {
+      opacity: 0.95;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      /* Soft shadow for depth */
+      backdrop-filter: blur(10px);
+      /* Optional: adds a blur effect to the background */
+      margin-top: 20px;
+      margin-bottom: 20px;
+      /* color: #fff; */
+    }
+
+    .container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      /* width: 800px; */
+      width: 90vw;
+      display: flex;
+      gap: 20px;
+    }
+
+    .container2 {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      /* width: 800px;
+      width: 90vw; */
+      display: flex;
+      gap: 20px;
+    }
     
-  <style type="text/css">
-  
+
+    .section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .section-2 {
+      flex: 2;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    /* Add more sectionand give proper flex value for the order */
+
+    .output {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 1400px;
+            min-width: 300px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            color: #333;
+            word-wrap: break-word;
+        }
+    
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        width: 100%;
+        padding: 10px;
+      }
+
+      .section, .section-2 {
+        flex: none;
+        width: 100%;
+        margin-bottom: 20px;
+      }
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      font-size: 1.5em;
+      color: #444;
+    }
+    .color-band {
+      display: inline-block;
+      width: 60px;
+      height: 25px;
+      /* margin: 5px; */
+      cursor: pointer;
+      /* border-radius: 5px; */
+      border: 0.5px solid rgba(228, 204, 204, 0.897);
+    }
+    .color-band.selected {
+      border: 3px solid #333;
+    }
+    /* #output {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #f7f7f7;
+      border-radius: 4px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      font-size: 1.1em;
+      text-align: center;
+    } */
+    .color-palette {
+      display: grid;
+      /* flex-direction: row; */
+      /* justify-content: space-around; */
+      justify-content: left;
+      flex-wrap: wrap;
+    }    
     
   </style>
-    <title>SHP's Most used toolset</title>
-    <link rel="icon" type="image/x-icon" href="img/favicon.png">
-
+  <title>SHP's Resistor Tools</title>
+  <link rel="icon" type="image/x-icon" href="img/favicon.png">
 </head>
 
 <nav class="navbar navbar-default navbar-fixed-top">
-    <div class="container-fluid">
-      <!-- Brand and toggle get grouped for better mobile display -->
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-          <span class="sr-only">Toggle navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <a class="navbar-brand" href="/"><img src="img/logo.png" alt="SHP's Most used toolset" height="30"></a>
-      </div>
-  
-      <!-- Collect the nav links, forms, and other content for toggling -->
-      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-        <ul class="nav navbar-nav">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+        data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/"><img src="img/logo.png" alt="SHP's Most used toolset" height="30"></a>
+    </div>
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
         <li><a href="/">Home</a></li>
+        <li><a href="pdfTools.html">PDF Tools</a></li>
+        <li><a href="ocr.html">OCR</a></li>
+        <li><a href="color.html">Color</a></li>
         <li><a href="resistor.html">Resistance</a></li>
-        
-        <li><a href="capacitor.html">Capacitance</a></li>
+        <li><a href="capacitor.html">Resistance</a></li>
         <li><a href="terminalVelocity.html">Terminal Velocity</a></li>
         <li><a href="math.html">Math Tools</a></li>
-         
-  
-        </ul>
-        <!--
-        <form class="navbar-form navbar-left" role="search">
-          <div class="form-group">
-            <input type="text" class="form-control" placeholder="Search">
-          </div>
-          <button type="submit" class="btn btn-default">Submit</button>
-        </form>
-        -->
-        <!--
+      </ul>
+      <!--
         <ul class="nav navbar-nav navbar-right">
           <li><a href="http://weather.shparvez.net/">Home page</a></li>
           <li class="dropdown">
@@ -68,118 +178,158 @@
               <li><a href="#">Separated link</a></li>
             </ul>
             -->
-          </li>
-        </ul>
-      </div><!-- /.navbar-collapse -->
-    </div><!-- /.container-fluid -->
-  </nav>
-  
+    </div>
+  </div>
+</nav>
 
 <body>
+  <br><br><br>
+    <div  class="container-fluid" style="color: white;">
+      <h1>Resistor Tools</h1>
+    </div>
+  
+  <div class="container glass" style="background: #dcfba5;">
+    
+    <br>
+    <div class="section">
+      <h2>Convert 3 digit resistor code to resistance value</h2>
 
-    <br><br><br>
+      <form name = 'myForm' onsubmit="res()">
+        3 digit resistance code: <input type = 'text' id = 'n1' onkeyup="res()" /> 
+          <input type = 'button' onclick = 'res()' value = 'Find Resistance'/>
+      </form>
+      <div class="output">
+        <div id='smart_r'>Resistance value for easy itentification will show here</div>
+        <br>
+        <div id='resistance'>Detailed Resistance value will show here</div>
+      </div>
 
-    <div class="container-fluid" style="position: relative">
+      <script language="javascript" type="text/javascript">
 
-        <div class="row">
+        function res() {
+          var num1 = document.getElementById('n1').value;
+          var base = num1.slice(0, 2);
+          var exponent = num1.slice(2, 3);
 
+          var x = Number(base) / 1;
+          var y = 10 ** Number(exponent);
+          var z = x * y;
+          var r_in_k = z/1000;
+          var r_in_M = z/1000000;
+          var r_in_G = z/1000000000;
+          document.getElementById("smart_r").innerHTML = `Simple view: ${r_in_k} KΩ`;
+          document.getElementById("resistance").innerHTML = `Resistance for ${num1} is: ${z} Ω (${r_in_k} KΩ or ${r_in_M} MΩ)`;
+          //document.getElementById("resistance").innerHTML = "Resistance for " + num1+ " is: " + z + " ohm or " + r_in_k + " Kilo ohm" + " or " + r_in_M + " Mega ohm";
 
+          if (z < 999) {
+            document.getElementById("smart_r").innerHTML = z + " Ω";
 
-            <div style="color: blue; " class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
-                <div class="jumbotron">
-                <div  class="blog-post" style="color: lime;">
-                
-                
-                <h1>What is it?</h1>
-                        <p class="lead">This page contains calculators related to resistance calculator and code converter</p>
-                
-                        
-                
-                
-                </div><!-- /Blog post -->
-                </div><!-- /Jumbotron -->
-                
-                
-                
-                
-                <div style="background: #dcfba5 !important;"     class="container-fluid"    >
-                
-                <h1>Convert 3 digit resistor code to resistance value</h1>
-                
-                <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3"  ; !important"  class="jumbotron"  > </div>
-                <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6"  ; !important"  class="jumbotron"  >
-                
-                
-                 <form name = 'myForm' onsubmit="res()">
-                         3 digit resistance code: <input type = 'text' id = 'n1' onkeyup="res()" /> 
-                           <input type = 'button' onclick = 'res()' value = 'Find Resistance'/>
-                 </form>
-                      
-                      <br>
-                      
-                      <div id = 'Resistance'>Resistance value will show here</div>
-                      
-                            <script language = "javascript" type = "text/javascript">
-                        
-                            function res(){
-                               var num1 = document.getElementById('n1').value;
-                               var base = num1.slice(0, 2);
-                               var exponent = num1.slice(2, 3);
-                
-                               var x = Number(base)/1; 
-                               var y = 10 ** Number(exponent);
-                               var z = x*y;
-                               var r_in_k = z/1000;
-                               var r_in_M = z/1000000;
-                document.getElementById("Resistance").innerHTML = "Resistance for " + num1+ " is: " + z + " ohm or " + r_in_k + " Kilo ohm" + " or " + r_in_M + " Mega ohm";
-                }
-                
-                
-                
-                
-                      </script>
-                
-                
-                
-                </div>
-                <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3"  ; !important"  class="jumbotron"  > </div>
-                        
-                     
-                      
-                
-                
-                
-                </div> <!-- /Button container -->
-                
-
-            </div><!-- /inner main content container -->
-            <br><br>
-
-
-            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3 sidebar">
-
-
-                <!--<?php include 'time.php'; ?>-->
-                <!--<?php include 'sharer.php'; ?>-->
-
-            </div><!-- /sidebar -->
-
-
-        </div> <!-- /row -->
-
-        <br><br><br><br>
-
-
-        <div class="jumbotron4">
-
-
-
-            copyright SHP @ 2024
-        </div> <!-- /footer div -->
-
-    </div> <!-- /container -->
-
-
+          } else if (z < 999999) {
+            document.getElementById("smart_r").innerHTML = r_in_k + " KΩ";
+          } else if (z < 999999999) {
+            document.getElementById("smart_r").innerHTML = r_in_M + " MΩ";
+          } else {
+            document.getElementById("smart_r").innerHTML = r_in_G + " GΩ";
+          }
+        }
+      </script>
+    </div>
+    <div class="section-2">
+        <h2>Resistor Color Code Calculator</h2>
+      <div class="container2">
+        <div id="band1Container">
+          <p>Band 1</p>
+          <div class="color-palette">
+            <div class="color-band" style="background-color: black;" onclick="selectBand(1, 0)"></div>
+            <div class="color-band" style="background-color: brown;" onclick="selectBand(1, 1)"></div>
+            <div class="color-band" style="background-color: red;" onclick="selectBand(1, 2)"></div>
+            <div class="color-band" style="background-color: orange;" onclick="selectBand(1, 3)"></div>
+            <div class="color-band" style="background-color: yellow;" onclick="selectBand(1, 4)"></div>
+            <div class="color-band" style="background-color: green;" onclick="selectBand(1, 5)"></div>
+            <div class="color-band" style="background-color: blue;" onclick="selectBand(1, 6)"></div>
+            <div class="color-band" style="background-color: violet;" onclick="selectBand(1, 7)"></div>
+            <div class="color-band" style="background-color: gray;" onclick="selectBand(1, 8)"></div>
+            <div class="color-band" style="background-color: white;" onclick="selectBand(1, 9)"></div>
+          </div>
+        </div>
+      
+        <div id="band2Container">
+          <p>Band 2</p>
+          <div class="color-palette">
+            <div class="color-band" style="background-color: black;" onclick="selectBand(2, 0)"></div>
+            <div class="color-band" style="background-color: brown;" onclick="selectBand(2, 1)"></div>
+            <div class="color-band" style="background-color: red;" onclick="selectBand(2, 2)"></div>
+            <div class="color-band" style="background-color: orange;" onclick="selectBand(2, 3)"></div>
+            <div class="color-band" style="background-color: yellow;" onclick="selectBand(2, 4)"></div>
+            <div class="color-band" style="background-color: green;" onclick="selectBand(2, 5)"></div>
+            <div class="color-band" style="background-color: blue;" onclick="selectBand(2, 6)"></div>
+            <div class="color-band" style="background-color: violet;" onclick="selectBand(2, 7)"></div>
+            <div class="color-band" style="background-color: gray;" onclick="selectBand(2, 8)"></div>
+            <div class="color-band" style="background-color: white;" onclick="selectBand(2, 9)"></div>
+          </div>
+        </div>
+      
+        <div id="band3Container">
+          <p>Band 3</p>
+          <div class="color-palette">
+            <div class="color-band" style="background-color: black;" onclick="selectBand(3, 0)"></div>
+            <div class="color-band" style="background-color: brown;" onclick="selectBand(3, 1)"></div>
+            <div class="color-band" style="background-color: red;" onclick="selectBand(3, 2)"></div>
+            <div class="color-band" style="background-color: orange;" onclick="selectBand(3, 3)"></div>
+            <div class="color-band" style="background-color: yellow;" onclick="selectBand(3, 4)"></div>
+            <div class="color-band" style="background-color: green;" onclick="selectBand(3, 5)"></div>
+            <div class="color-band" style="background-color: blue;" onclick="selectBand(3, 6)"></div>
+            <div class="color-band" style="background-color: violet;" onclick="selectBand(3, 7)"></div>
+            <div class="color-band" style="background-color: gray;" onclick="selectBand(3, 8)"></div>
+            <div class="color-band" style="background-color: white;" onclick="selectBand(3, 9)"></div>
+            <div class="color-band" style="background-color: gold;" onclick="selectBand(3, -1)"></div>
+            <div class="color-band" style="background-color: silver;" onclick="selectBand(3, -2)"></div>
+            <div class="color-band" style="background-color: pink;" onclick="selectBand(3, -3)"></div>
+          </div>
+        </div>
+      
+        <!-- <button onclick="convertResistorCode()">Calculate Resistance</button> -->
+        <div id="output">Resistance value will appear here.</div>
+      </div>
+      
+      <script>
+        const selectedBands = { band1: null, band2: null, multiplier: null };
+      
+        function selectBand(band, value) {
+          if (band === 1) selectedBands.band1 = value;
+          if (band === 2) selectedBands.band2 = value;
+          if (band === 3) selectedBands.multiplier = 10 ** Number(value);
+          if(value<0) value=9-value;
+          
+          document.querySelectorAll(`#band${band}Container .color-band`).forEach(el => el.classList.remove("selected"));
+          document.querySelector(`#band${band}Container .color-band:nth-child(${value + 1})`).classList.add("selected");
+          convertResistorCode();
+        }
+      
+        function convertResistorCode() {
+          const { band1, band2, multiplier } = selectedBands;
+      
+          if (band1 === null || band2 === null || multiplier === null) {
+            document.getElementById("output").textContent = "Please select all color bands!";
+            return;
+          }
+      
+          const resistance = (band1 * 10 + band2) * multiplier;
+          let displayValue = `${resistance} Ω`;
+      
+          if (resistance >= 1000 && resistance < 1000000) {
+            displayValue = `${(resistance / 1000).toFixed(2)} kΩ`;
+          } else if (resistance >= 1000000) {
+            displayValue = `${(resistance / 1000000).toFixed(2)} MΩ`;
+          }
+      
+          document.getElementById("output").textContent = `Resistance: ${displayValue}`;
+        }
+      </script>
+  
+    </div>
+  </div>
+  <br>
 </body>
 
 </html>
