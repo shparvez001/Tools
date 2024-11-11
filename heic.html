@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap-theme.min.css">
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: Roboto, sans-serif;
+            background: linear-gradient(45deg,rgba(118, 8, 245, 0.3), rgba(211, 12, 12, 0.3));
+            margin: 0;
+            padding: 0;
+            color: #333;
+            display: grid;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        .glass {
+            opacity: 0.95;
+            border-radius: 12px; 
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+            backdrop-filter: blur(10px); /* Optional: adds a blur effect to the background */
+            margin-top: 20px;
+            margin-bottom: 20px;
+            /* color: #fff; */
+        }
+
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            /* width: 800px; */
+            width: 90vw;
+            display: flex;
+            gap: 20px;
+        }
+
+        /* Left Column for Input */
+        .input-section {
+            flex: 1;
+            text-align: center;
+        }
+
+        input[type="file"],
+        select {
+          padding: 10px;
+          width: 100%;
+          font-size: 1rem;
+          border-radius: 4px;
+          border: 1px solid #33ff00;
+          outline: none;
+          transition: all 0.3s ease;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        /* Right Column for Output */
+        .output-section {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .output-section-2 {
+            flex: 3;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .inp-button {
+          background-color: blue;
+          color: white;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          font-weight: bold;
+          width: 100%;
+          transition: background-color 0.3s ease;
+          margin: 5px;
+        }
+    
+        .inp-button:hover {
+          background-color: rgba(76, 175, 80, 1);
+        }
+
+        .downloadButton{
+            background-color: blue;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            align-content: center;
+        }
+
+
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                width: 100%;
+                padding: 10px;
+            }
+            .input-section, .output-section, .output-section-2 {
+                flex: none;
+                width: 100%;
+                margin-bottom: 20px;
+            }
+        }
+                
+    </style>
+    <title>HEIC to JPG/PNG Converter</title>
+    <link rel="icon" type="image/x-icon" href="img/favicon.png">
+</head>
+
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"><img src="img/logo.png" alt="SHP's Most used toolset" height="30"></a>
+        </div>
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li><a href="/">Home</a></li>
+                <li><a href="pdfTools.html">PDF Tools</a></li>
+                <li><a href="ocr.html">OCR</a></li>
+                <li><a href="color.html">Color</a></li>
+                <li><a href="hash.html">Hash</a></li>
+                <li><a href="resistor.html">Resistance</a></li>
+                <li><a href="capacitor.html">Capacitance</a></li>
+                <li><a href="terminalVelocity.html">Terminal Velocity</a></li>
+                <li><a href="math.html">Math Tools</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<body>
+    <br><br><br>
+    <div class="container glass" style="background: #dcfba5;" >
+        <!-- Input Section -->
+        <div class="input-section">
+            <!-- File input for HEIC files -->
+            <input type="file" id="inputFile" accept=".heic" multiple /><br>
+            <div id="fileNames"></div>
+            <button id="convertToJPGButton" class="inp-button">Convert to JPG</button>
+            <button id="convertToPNGButton" class="inp-button">Convert to PNG</button>
+        </div>
+
+        <!-- Output Section -->
+        <div class="output-section">
+            <!-- Container for progress bars, previews, and download links -->
+            <div id="conversionResults"></div>
+        </div>
+    </div>
+    <br>
+    <!-- Include the correct version of the heic2any library -->
+    <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.3/dist/heic2any.min.js"></script>    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Button event listeners for conversion to JPG or PNG
+            document.getElementById("convertToJPGButton").addEventListener("click", () => convertImages("image/jpeg"));
+            document.getElementById("convertToPNGButton").addEventListener("click", () => convertImages("image/png"));
+
+            let currentBlobURLs = [];
+
+            function updateDebugMessage(message, container) {
+                const debugMessage = container.querySelector(".debugMessage");
+                debugMessage.textContent = message;
+            }
+
+            let selectedFiles = [];
+
+            // Function to update the file display
+            function updateFileDisplay() {
+                const fileNamesDiv = document.getElementById('fileNames');
+                fileNamesDiv.innerHTML = '';
+                const selectedFiles = document.getElementById("inputFile").files;
+                console.log(selectedFiles);
+
+                for (let i = 0; i < selectedFiles.length; i++) {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    fileItem.innerHTML = `<span>${selectedFiles[i].name}</span>`;
+                    fileNamesDiv.appendChild(fileItem);
+                }
+            }
+
+            // Function to handle file selection 
+            document.getElementById('inputFile').addEventListener('change', function(event) {
+                        updateFileDisplay();
+                    });
+
+            async function convertImages(outputFormat) {
+                const inputFiles = document.getElementById("inputFile").files;
+                const conversionResults = document.getElementById("conversionResults");
+
+                // Clear previous results and blob URLs
+                conversionResults.innerHTML = '';
+                currentBlobURLs.forEach(url => URL.revokeObjectURL(url));
+                currentBlobURLs = [];
+
+                if (inputFiles.length === 0) {
+                    alert("Please upload at least one valid HEIC file.");
+                    return;
+                }
+
+                // Disable buttons during conversion
+                document.getElementById("convertToJPGButton").disabled = true;
+                document.getElementById("convertToPNGButton").disabled = true;
+
+                for (let i = 0; i < inputFiles.length; i++) {
+                    const file = inputFiles[i];
+                    const originalFileName = file.name.split('.').slice(0, -1).join('.');
+                    
+                    // Create a container for each file’s progress and result
+                    const resultContainer = document.createElement("div");
+                    resultContainer.classList.add("resultContainer");
+                    resultContainer.style.marginBottom = "20px";
+
+                    // Debug message and progress bar for each file
+                    resultContainer.innerHTML = `
+                        <p><strong>File:</strong> ${file.name}</p>
+                        <p class="debugMessage">Starting conversion...</p>
+                        <progress class="progressBar" value="0" max="100" style="width: 100%;"></progress>
+                        <img class="outputPreview" style="max-width: 400px; display: none; margin: 10px;" />
+                        <a class="downloadButton" style="display: none;" download>Download Converted Image</a>
+                    `;
+                    conversionResults.appendChild(resultContainer);
+
+                    const progressBar = resultContainer.querySelector(".progressBar");
+                    const outputPreview = resultContainer.querySelector(".outputPreview");
+                    const downloadButton = resultContainer.querySelector(".downloadButton");
+
+                    try {
+                        updateDebugMessage("Processing HEIC file...", resultContainer);
+
+                        // Simulate progress for the demo
+                        let progressInterval = setInterval(() => {
+                            if (progressBar.value < 80) {
+                                progressBar.value += 5;
+                            }
+                        }, 100);
+
+                        // Convert the HEIC file
+                        const convertedBlob = await heic2any({
+                            blob: file,
+                            toType: outputFormat
+                        });
+
+                        clearInterval(progressInterval);
+                        progressBar.value = 100;
+                        updateDebugMessage("Conversion complete!", resultContainer);
+
+                        // Create a Blob URL for the converted image
+                        const blobURL = URL.createObjectURL(convertedBlob);
+                        currentBlobURLs.push(blobURL); // Store to revoke later
+
+                        // Display preview and setup download
+                        outputPreview.src = blobURL;
+                        outputPreview.style.display = "block";
+
+                        downloadButton.href = blobURL;
+                        downloadButton.download = `${originalFileName}.${outputFormat === "image/jpeg" ? "jpg" : "png"}`;
+                        downloadButton.style.display = "inline";
+                        downloadButton.textContent = "Download Converted Image";
+
+                    } catch (error) {
+                        console.error("Error converting HEIC file:", error);
+                        updateDebugMessage("Error: Could not convert the HEIC file. Please try another file.", resultContainer);
+                        alert(`There was an error converting ${file.name}.`);
+                    } finally {
+                        // Hide progress bar after a short delay
+                        setTimeout(() => {
+                            progressBar.style.display = "none";
+                        }, 1000);
+                    }
+                }
+
+                // Re-enable buttons after all conversions are complete
+                document.getElementById("convertToJPGButton").disabled = false;
+                document.getElementById("convertToPNGButton").disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
