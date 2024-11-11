@@ -111,7 +111,7 @@
                 
                 <div style="background: #dcfba5; !important"     class="container-fluid"    >
                 <h1>Prime Number testing</h1>
-                <input type="text" id="number-to-check" placeholder="Input the number to check"><br>
+                <input type="text" id="number-to-check" placeholder="Input the number to check">
                   <input type="submit" value="Check" onclick="primeCheck('number-to-check','prime-box')">
                 <p id="prime-box"></p>
                 </div> <!-- /Button container -->
@@ -144,6 +144,59 @@
                     }
                 </script>            
                 
+
+                <div style="background: #dcfba5; !important"     class="container-fluid"    >
+                  <h1>LCM and HCF Calculator</h1>
+                  <label for="numbers">Enter numbers (comma-separated): </label>
+                  <input type="text" id="numbers" placeholder="e.g., 12, 18, 24">
+                  <button onclick="calculate()">Calculate</button>
+
+                  <h3>Results:</h3>
+                  <p id="lcm-result">LCM: </p>
+                  <p id="hcf-result">HCF: </p>
+
+                  <script>
+                    // Function to calculate the GCD (HCF) of two numbers
+                    function gcd(a, b) {
+                      while (b !== 0) {
+                        [a, b] = [b, a % b];
+                      }
+                      return a;
+                    }
+
+                    // Function to calculate the LCM of two numbers
+                    function lcm(a, b) {
+                      return (a * b) / gcd(a, b);
+                    }
+
+                    // Function to calculate the GCD of multiple numbers
+                    function gcdMultiple(numbers) {
+                      return numbers.reduce((acc, num) => gcd(acc, num));
+                    }
+
+                    // Function to calculate the LCM of multiple numbers
+                    function lcmMultiple(numbers) {
+                      return numbers.reduce((acc, num) => lcm(acc, num));
+                    }
+
+                    // Main function to handle input and calculate results
+                    function calculate() {
+                      const input = document.getElementById("numbers").value;
+                      const numbers = input.split(",").map(num => parseInt(num.trim()));
+
+                      if (numbers.some(isNaN)) {
+                        alert("Please enter valid numbers separated by commas.");
+                        return;
+                      }
+
+                      const hcfResult = gcdMultiple(numbers);
+                      const lcmResult = lcmMultiple(numbers);
+
+                      document.getElementById("hcf-result").innerText = `HCF: ${hcfResult}`;
+                      document.getElementById("lcm-result").innerText = `LCM: ${lcmResult}`;
+                    }
+                  </script>
+                </div>
                 
                 </div><!-- /Jumbotron -->       
 
