@@ -110,7 +110,24 @@
             align-content: center;
         }
 
-
+        /* Progress bar styling */
+        #progressBarContainer {
+          width: 100%;
+          background-color: #e0e0e0;
+          height: 5px;
+          border-radius: 3px;
+          position: fixed;
+          top: 0;
+          left: 0;
+          z-index: 9999; 
+        }
+    
+        #progressBarGlobal {
+          height: 100%;
+          width: 0;
+          background-color: #4caf50;
+          border-radius: 3px;
+        }
 
         @media (max-width: 768px) {
             .container {
@@ -169,11 +186,17 @@
             <button id="convertToPNGButton" class="inp-button">Convert to PNG</button>
         </div>
 
+
         <!-- Output Section -->
         <div class="output-section">
             <!-- Container for progress bars, previews, and download links -->
             <div id="conversionResults"></div>
         </div>
+    </div>
+    
+    <!-- Progress bar -->
+    <div id="progressBarContainer">
+        <div id="progressBarGlobal"></div>
     </div>
     <br>
     <!-- Include the correct version of the heic2any library -->
@@ -216,6 +239,7 @@
             async function convertImages(outputFormat) {
                 const inputFiles = document.getElementById("inputFile").files;
                 const conversionResults = document.getElementById("conversionResults");
+                const progressBarGlobal = document.getElementById('progressBarGlobal');
 
                 // Clear previous results and blob URLs
                 conversionResults.innerHTML = '';
@@ -230,6 +254,9 @@
                 // Disable buttons during conversion
                 document.getElementById("convertToJPGButton").disabled = true;
                 document.getElementById("convertToPNGButton").disabled = true;
+
+                // Clear previous progress bar
+                progressBarGlobal.style.width = '0%';
 
                 for (let i = 0; i < inputFiles.length; i++) {
                     const file = inputFiles[i];
@@ -297,6 +324,8 @@
                             progressBar.style.display = "none";
                         }, 1000);
                     }
+                    let progress = Math.round((i+1)/inputFiles.length * 100);
+                    progressBarGlobal.style.width = progress + '%';
                 }
 
                 // Re-enable buttons after all conversions are complete
