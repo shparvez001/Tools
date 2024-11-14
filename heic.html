@@ -132,13 +132,19 @@
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
-                width: 100%;
+                width: 95%;
                 padding: 10px;
             }
             .input-section, .output-section, .output-section-2 {
                 flex: none;
-                width: 100%;
+                width: 90%;
                 margin-bottom: 20px;
+            }
+            .outputPreview{
+                width: 90%;
+            }
+            .downloadButton{
+                padding: 5px;
             }
         }
                 
@@ -312,7 +318,7 @@
                         downloadButton.href = blobURL;
                         downloadButton.download = `${originalFileName}.${outputFormat === "image/jpeg" ? "jpg" : "png"}`;
                         downloadButton.style.display = "inline";
-                        downloadButton.textContent = "Download Converted Image";
+                        downloadButton.textContent = "Download";
 
                     } catch (error) {
                         console.error("Error converting HEIC file:", error);
