@@ -655,6 +655,10 @@ document.getElementById("splitButton").addEventListener("click", async () => {
                 <h2>Merge PDFs</h2>
                 <input type="file" id="mergeFiles" accept="application/pdf" multiple />
                 <br>
+                <input type="text" id="watermarkText" placeholder="Enter watermark text" class="page-selection" />
+                <br>
+                <input type="checkbox" id="footerText" name="footerText"> <label for="footerText"> Add filename as footer text</label>
+                <br>
                 <div id="fileNames"></div>
                 <!-- <br>
                 <h4>Select Pages for Merging</h4>
@@ -731,7 +735,9 @@ document.getElementById("splitButton").addEventListener("click", async () => {
                             alert('Please select PDF files to merge.');
                             return;
                         }
-                
+
+                        const watermarkText = document.getElementById('watermarkText').value.trim();      
+                        const footerTextStatus = document.getElementById('footerText').checked;              
                         const pdfDoc = await PDFLib.PDFDocument.create();
                         const mergeButton = document.getElementById('mergeButton');
                         mergeButton.disabled = true; // Disable button during processing
@@ -759,6 +765,7 @@ document.getElementById("splitButton").addEventListener("click", async () => {
                                         for (let i = startIndex; i <= endIndex; i++) {
                                             if (i >= 0 && i < existingPdfDoc.getPageCount()) {
                                                 const [copiedPage] = await pdfDoc.copyPages(existingPdfDoc, [i]);
+                                                if (footerTextStatus) {copiedPage.drawText(file.name, {x:10, y:10, size:12, opacity: 0.75,}); }      
                                                 pdfDoc.addPage(copiedPage);
                                             } else {
                                                 console.error(`Page ${i + 1} is out of bounds for file: ${file.name}`);
@@ -770,10 +777,38 @@ document.getElementById("splitButton").addEventListener("click", async () => {
                                     const pageCount = existingPdfDoc.getPageCount();
                                     for (let i = 0; i < pageCount; i++) {
                                         const [copiedPage] = await pdfDoc.copyPages(existingPdfDoc, [i]);
+                                        if (footerTextStatus) {copiedPage.drawText(file.name, {x:10, y:10, size:12, opacity: 0.75,}); }                                        
                                         pdfDoc.addPage(copiedPage);
                                     }
                                 }
+
+                                // const pages = pdfDoc.getPages();
+                                // pages.forEach(page => {
+                                //     const { width, height } = page.getSize();
+                                //     page.drawText(watermarkText, {
+                                //         x: 10,
+                                //         y: 10,
+                                //         size: 16,
+                                //         color: PDFLib.rgb(0.75, 0.75, 0.75),
+                                //         //rotate: PDFLib.degrees(45),
+                                //         opacity: 0.5,
+                                //     });
+                                // });
                             }
+
+                            // Add watermark to each page
+                            const pages = pdfDoc.getPages();
+                            pages.forEach(page => {
+                                const { width, height } = page.getSize();
+                                page.drawText(watermarkText, {
+                                    x: width / 2 - 50,
+                                    y: height / 2,
+                                    size: 30,
+                                    color: PDFLib.rgb(0.75, 0.75, 0.75),
+                                    rotate: PDFLib.degrees(45),
+                                    opacity: 0.5,
+                                });
+                            });
                 
                             const pdfBytes = await pdfDoc.save();
                             const blob = new Blob([pdfBytes], { type: 'application/pdf' });

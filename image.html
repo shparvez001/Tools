@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Resizer Tool with Crop and Preview</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        .drop-zone {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 500px;
+            color: #aaa;
+            cursor: pointer;
+        }
+        #image-container {
+            display: none;
+            margin: 20px auto;
+            max-width: 90%;
+        }
+        canvas, #resized-preview {
+            display: none;
+            margin: 10px auto;
+            max-width: 90%;
+        }
+        .controls {
+            margin-top: 10px;
+        }
+        img {
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Image Resizer Tool with Crop and Preview</h1>
+    <div class="drop-zone" id="drop-zone">
+        Drag & Drop Image Here or Click to Upload
+        <input type="file" id="file-input" accept="image/*" hidden>
+    </div>
+    <div id="image-container">
+        <img id="crop-image" alt="To Crop">
+    </div>
+
+    <div id="resize-options" style="display:none;">
+        <h2>Resize Options</h2>
+        <label>
+            Width: <input type="number" id="resize-width" min="1">
+        </label>
+        <label>
+            Height: <input type="number" id="resize-height" min="1">
+        </label>
+        <label>
+            <input type="checkbox" id="maintain-aspect-ratio" checked>
+            Maintain Aspect Ratio
+        </label>
+        <button id="resize-btn">Resize</button>
+    </div>
+
+    <canvas id="canvas"></canvas>
+    <div id="resized-preview">
+        <h2>Preview</h2>
+        <img id="preview-image" alt="Preview">
+    </div>
+    <div id="download-container" style="display:none;">
+        <a id="download-btn" download="resized-image.png">Download Resized Image</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script>
+        const dropZone = document.getElementById("drop-zone");
+        const fileInput = document.getElementById("file-input");
+        const cropImage = document.getElementById("crop-image");
+        const imageContainer = document.getElementById("image-container");
+        const resizeOptions = document.getElementById("resize-options");
+        const resizeWidth = document.getElementById("resize-width");
+        const resizeHeight = document.getElementById("resize-height");
+        const maintainAspectRatio = document.getElementById("maintain-aspect-ratio");
+        const resizeBtn = document.getElementById("resize-btn");
+        const canvas = document.getElementById("canvas");
+        const previewImage = document.getElementById("preview-image");
+        const resizedPreview = document.getElementById("resized-preview");
+        const downloadContainer = document.getElementById("download-container");
+        const downloadBtn = document.getElementById("download-btn");
+        let cropper;
+
+        // Drag and Drop Events
+        dropZone.addEventListener("click", () => fileInput.click());
+        dropZone.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = "#000";
+        });
+        dropZone.addEventListener("dragleave", () => {
+            dropZone.style.borderColor = "#ccc";
+        });
+        dropZone.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = "#ccc";
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith("image/")) {
+                loadFile(file);
+            }
+        });
+        fileInput.addEventListener("change", () => {
+            const file = fileInput.files[0];
+            if (file && file.type.startsWith("image/")) {
+                loadFile(file);
+            }
+        });
+
+        // Load Image File
+        function loadFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                cropImage.src = e.target.result;
+                imageContainer.style.display = "block";
+                resizeOptions.style.display = "block";
+
+                // Initialize Cropper
+                if (cropper) cropper.destroy();
+                cropper = new Cropper(cropImage, {
+                    viewMode: 1,
+                    aspectRatio: NaN,
+                    ready() {
+                        updateResizeInputs();
+                    },
+                });
+
+                // Reset dimensions and hide previous preview
+                downloadContainer.style.display = "none";
+                resizedPreview.style.display = "none";
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Update Resize Inputs
+        function updateResizeInputs() {
+            const cropData = cropper.getData();
+            resizeWidth.value = Math.round(cropData.width);
+            resizeHeight.value = Math.round(cropData.height);
+        }
+
+        // Sync Width and Height Inputs
+        resizeWidth.addEventListener("input", () => {
+            if (maintainAspectRatio.checked) {
+                const aspectRatio = cropper.getData().width / cropper.getData().height;
+                resizeHeight.value = Math.round(resizeWidth.value / aspectRatio);
+            }
+        });
+        resizeHeight.addEventListener("input", () => {
+            if (maintainAspectRatio.checked) {
+                const aspectRatio = cropper.getData().width / cropper.getData().height;
+                resizeWidth.value = Math.round(resizeHeight.value * aspectRatio);
+            }
+        });
+
+        // Resize Button Click
+        resizeBtn.addEventListener("click", () => {
+            const width = parseInt(resizeWidth.value);
+            const height = parseInt(resizeHeight.value);
+
+            const croppedCanvas = cropper.getCroppedCanvas();
+
+            if (!croppedCanvas) {
+                alert("Please crop the image first.");
+                return;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(croppedCanvas, 0, 0, croppedCanvas.width, croppedCanvas.height, 0, 0, width, height);
+
+            const resizedImageURL = canvas.toDataURL("image/png");
+            previewImage.src = resizedImageURL;
+            resizedPreview.style.display = "block";
+
+            downloadBtn.href = resizedImageURL;
+            downloadContainer.style.display = "block";
+        });
+    </script>
+</body>
+</html>
