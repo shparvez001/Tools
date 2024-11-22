@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vector to PNG Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        #dropZone {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            margin: 20px;
+            background-color: #f9f9f9;
+            cursor: pointer;
+        }
+        #dropZone.hover {
+            background-color: #e0e0e0;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            margin: 10px 0;
+            max-width: 100%;
+        }
+        input, button, label {
+            margin: 10px;
+        }
+        #outputSize {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        #outputSize input {
+            width: 80px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Vector to PNG Converter</h1>
+    <div id="dropZone">Drag & Drop your SVG or PDF file here</div>
+    <input type="file" id="fileInput" accept=".svg,.pdf" style="display: none;" />
+    <br>
+    <div id="outputSize">
+        <label>Width: <input type="number" id="widthInput" placeholder="Auto" /></label>
+        <label>Height: <input type="number" id="heightInput" placeholder="Auto" /></label>
+        <label><input type="checkbox" id="maintainAspectRatio" checked /> Maintain Aspect Ratio</label>
+    </div>
+    <br>
+    <button id="rerenderButton" style="display: none;">Re-render</button>
+    <button id="downloadButton" style="display: none;">Download PNG</button>
+    <br>
+    <canvas id="canvas" style="display: none;"></canvas>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const downloadButton = document.getElementById('downloadButton');
+        const rerenderButton = document.getElementById('rerenderButton');
+        const widthInput = document.getElementById('widthInput');
+        const heightInput = document.getElementById('heightInput');
+        const maintainAspectRatio = document.getElementById('maintainAspectRatio');
+
+        let originalWidth = 0, originalHeight = 0;
+        let lastLoadedPDF = null;
+        let lastPDFPage = null;
+        let lastLoadedImage = null;
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('hover');
+        });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('hover'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('hover');
+            handleFile(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+
+        function handleFile(file) {
+            if (!file) return;
+
+            resetCanvasState();
+
+            const fileType = file.name.split('.').pop().toLowerCase();
+
+            if (fileType === 'svg') {
+                handleSVG(file);
+            } else if (fileType === 'pdf') {
+                handlePDF(file);
+            } else {
+                alert('Unsupported file format. Please upload SVG or PDF.');
+            }
+        }
+
+        function resetCanvasState() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            canvas.style.display = 'none';
+            downloadButton.style.display = 'none';
+            rerenderButton.style.display = 'none';
+            lastLoadedImage = null;
+            lastLoadedPDF = null;
+            lastPDFPage = null;
+            originalWidth = 0;
+            originalHeight = 0;
+        }
+
+        function handleSVG(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    originalWidth = img.width;
+                    originalHeight = img.height;
+                    lastLoadedImage = img;
+                    renderCanvas(img);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handlePDF(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const loadingTask = pdfjsLib.getDocument({ data: e.target.result });
+                loadingTask.promise.then((pdf) => {
+                    pdf.getPage(1).then((page) => {
+                        lastLoadedPDF = pdf;
+                        lastPDFPage = page;
+
+                        const viewport = page.getViewport({ scale: 1.5 });
+                        originalWidth = viewport.width;
+                        originalHeight = viewport.height;
+
+                        renderPDF(page);
+                    });
+                }).catch((err) => alert('Error loading PDF: ' + err.message));
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function renderPDF(page) {
+            const width = parseInt(widthInput.value) || originalWidth;
+            const height = maintainAspectRatio.checked
+                ? (width / originalWidth) * originalHeight
+                : (parseInt(heightInput.value) || originalHeight);
+
+            const scale = width / originalWidth;
+            const scaledViewport = page.getViewport({ scale });
+
+            canvas.width = width;
+            canvas.height = height;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const renderContext = {
+                canvasContext: ctx,
+                viewport: scaledViewport
+            };
+
+            page.render(renderContext).promise.then(() => {
+                showControls();
+            });
+        }
+
+        function renderCanvas(img) {
+            const width = parseInt(widthInput.value) || originalWidth;
+            const height = maintainAspectRatio.checked
+                ? (width / originalWidth) * originalHeight
+                : (parseInt(heightInput.value) || originalHeight);
+
+            canvas.width = width;
+            canvas.height = height;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, width, height);
+
+            showControls();
+        }
+
+        rerenderButton.addEventListener('click', () => {
+            if (lastLoadedImage) {
+                renderCanvas(lastLoadedImage);
+            } else if (lastPDFPage) {
+                renderPDF(lastPDFPage);
+            }
+        });
+
+        function showControls() {
+            canvas.style.display = 'block';
+            rerenderButton.style.display = 'inline-block';
+            downloadButton.style.display = 'inline-block';
+            downloadButton.onclick = () => {
+                const pngUrl = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.href = pngUrl;
+                link.download = 'converted.png';
+                link.click();
+            };
+        }
+    </script>
+</body>
+</html>
