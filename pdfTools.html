@@ -269,6 +269,10 @@
                                 }
                             });
 
+                            document.getElementById('pdfFile').addEventListener('change', function(event) {
+                               dropZone.textContent = fileInput.files[0].name;
+                            });
+
                             async function fetchPdfFromUrl(url) {
                                 const response = await fetch(url);
                                 if (!response.ok) throw new Error('Failed to fetch the PDF from the URL');
