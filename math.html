@@ -24,7 +24,13 @@
   <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
   <link rel="stylesheet" href="css/style.css">
   <style type="text/css">
-  
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    input {
+      margin: 5px 0;
+    }  
     
   </style>
     <title>SHP's Most used toolset</title>
@@ -114,7 +120,7 @@
                 
                 
                 <div style="background: #dcfba5 !important;"     class="container-fluid"    >
-                <h1>Prime Number testing</h1>
+                <h2>Prime Number testing</h2>
                 <input type="text" id="number-to-check" placeholder="Input the number to check">
                   <input type="submit" value="Check" onclick="primeCheck('number-to-check','prime-box')">
                 <p id="prime-box"></p>
@@ -150,7 +156,7 @@
                 
 
                 <div style="background: #dcfba5 !important;"     class="container-fluid"    >
-                  <h1>LCM and HCF Calculator</h1>
+                  <h2>LCM and HCF Calculator</h2>
                   <label for="numbers">Enter numbers (comma-separated): </label>
                   <input type="text" id="numbers" placeholder="e.g., 12, 18, 24">
                   <button onclick="calculate()">Calculate</button>
@@ -199,6 +205,86 @@
                       document.getElementById("hcf-result").innerText = `HCF: ${hcfResult}`;
                       document.getElementById("lcm-result").innerText = `LCM: ${lcmResult}`;
                     }
+                  </script>
+                </div>
+
+                <div style="background: #dcfba5 !important;"     class="container-fluid"    >
+                  <h2>Combination and Permutation Calculator</h2>
+                  <label for="n-value">Enter n (total items): </label>
+                  <input type="number" id="n-value" placeholder="e.g., 5">
+                  <br>
+                  
+                  <label for="r-value">Enter r (selected items): </label>
+                  <input type="number" id="r-value" placeholder="e.g., 3">
+                  <br>
+                  <button onclick="calculate2()">Calculate</button>
+
+                  <h3>Results:</h3>
+                  <p id="combination-result">Combinations (C): </p>
+                  <p id="permutation-result">Permutations (P): </p>
+
+                  <script>
+                    // Function to calculate factorial
+                    function factorial(num) {
+                      if (num === 0 || num === 1) return 1;
+                      let result = 1;
+                      for (let i = 2; i <= num; i++) {
+                        result *= i;
+                      }
+                      return result;
+                    }
+
+                    // Main function to calculate and display results
+                    function calculate2() {
+                    const n = parseInt(document.getElementById("n-value").value);
+                    const r = parseInt(document.getElementById("r-value").value);
+
+                    if (isNaN(n) || isNaN(r) || n < 0 || r < 0) {
+                      alert("Please enter valid non-negative integers for n and r.");
+                      return;
+                    }
+
+                    if (r > n) {
+                      alert("r cannot be greater than n.");
+                      return;
+                    }
+
+                    // Calculate combinations and permutations
+                    const permutation = factorial(n) / factorial(n - r);
+                    const combination = factorial(n) / (factorial(r) * factorial(n - r));
+
+                    // Round results to avoid floating-point errors
+                    const roundedPermutation = Math.round(permutation);
+                    const roundedCombination = Math.round(combination);
+
+                    // Display results
+                    document.getElementById("combination-result").innerText = `Combinations (C): ${roundedCombination}`;
+                    document.getElementById("permutation-result").innerText = `Permutations (P): ${roundedPermutation}`;
+                  }
+
+                    function calculate2_OLD() {
+                      const n = parseInt(document.getElementById("n-value").value);
+                      const r = parseInt(document.getElementById("r-value").value);
+
+                      if (isNaN(n) || isNaN(r) || n < 0 || r < 0) {
+                        alert("Please enter valid non-negative integers for n and r.");
+                        return;
+                      }
+
+                      if (r > n) {
+                        alert("r cannot be greater than n.");
+                        return;
+                      }
+
+                      // Calculate combinations and permutations
+                      const permutation = factorial(n) / factorial(n - r);
+                      const combination = factorial(n) / (factorial(r) * factorial(n - r));
+
+                      // Display results
+                      document.getElementById("combination-result").innerText = `Combinations (C): ${combination}`;
+                      document.getElementById("permutation-result").innerText = `Permutations (P): ${permutation}`;
+                    }
+                    
                   </script>
                 </div>
                 
