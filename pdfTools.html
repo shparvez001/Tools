@@ -780,6 +780,7 @@ document.getElementById("splitButton").addEventListener("click", async () => {
                         const pdfDoc = await PDFLib.PDFDocument.create();
                         const mergeButton = document.getElementById('mergeButton');
                         mergeButton.disabled = true; // Disable button during processing
+                        const font = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
                 
                         try {
                             for (const [index, file] of selectedFiles.entries()) {
@@ -839,13 +840,17 @@ document.getElementById("splitButton").addEventListener("click", async () => {
                             const pages = pdfDoc.getPages();
                             pages.forEach(page => {
                                 const { width, height } = page.getSize();
+                                const fontSize=50;
+                                const textWidth=watermarkText.length*20;
+                                // const font = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+                                // const textWidth = font.widthOfTextAtSize(watermarkText, fontSize);
                                 page.drawText(watermarkText, {
-                                    x: width / 2 - 50,
+                                    x: (width -textWidth)/ 2,
                                     y: height / 2,
-                                    size: 30,
+                                    size: fontSize,
                                     color: PDFLib.rgb(0.75, 0.75, 0.75),
                                     rotate: PDFLib.degrees(45),
-                                    opacity: 0.5,
+                                    opacity: 0.45,
                                 });
                             });
                 
