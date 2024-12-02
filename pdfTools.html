@@ -64,6 +64,42 @@
         #fileNames {
             margin-top: 10px;
         }
+
+        .pdf2imgParent{
+            display: flex;
+            /* flex-wrap: wrap; */
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .pdf2img{
+            display: flex;
+            width: 70%;
+            margin: 0 auto;
+            justify-content: center;
+            border-radius: 5px;
+        }
+
+        .downloadButton{
+            display: flex;
+            width: 70%; /* 80px */
+            margin: 0 auto;
+            justify-content: center;
+            background-color: #007bff;
+            color: lime;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            margin-top: 10px;
+            text-decoration: none;
+            /* writing-mode: vertical-rl; 
+            text-orientation: upright; */
+        }
+
+        .downloadButton:hover{
+            background-color: gainsboro;
+        }
+
         .file-item {
             display: flex;
             justify-content: space-between;
@@ -195,8 +231,8 @@
                         <span  id="pagesOmitted"></span>
                         <br>
                         <button id="processPdf">Process PDF (2-in-1 & Omit Pages)</button>
-                        <!--<button id="convertToImage">Convert PDF to Images</button>-->
-                        <button id="convertToImage">Convert PDF to Images</button>
+                        <button id="convertToImage">Preview Images</button>
+                        <button id="convertToImage2">Zip Images</button>
                         <!-- <button id="splitPdf">Split PDF Pages</button>                         -->
                         <button id="splitButton">Split PDF</button>
                         <br><br>
@@ -342,6 +378,7 @@
 
                                 // Create a container for images
                                 const imageContainer = document.createElement('div');
+                                imageContainer.className='pdf2imgParent';
                                 document.body.appendChild(imageContainer);
 
                                 for (let i = 0; i < totalPages; i++) {
@@ -365,6 +402,7 @@
                                     // Convert the canvas to an image
                                     const img = document.createElement('img');
                                     img.src = canvas.toDataURL('image/png'); // Convert canvas to PNG
+                                    img.className = 'pdf2img';
 
                                     // Append image to container
                                     imageContainer.appendChild(img);
@@ -374,6 +412,7 @@
                                     downloadLink.href = img.src;
                                     downloadLink.download = originalFileName+`_page_${i + 1}.png`;
                                     downloadLink.textContent = `Download Page ${i + 1}`;
+                                    downloadLink.className='downloadButton';
                                     imageContainer.appendChild(downloadLink);
 
                                     // Optionally, separate pages with a line break
@@ -449,7 +488,7 @@
                                 });
                             }
 
-                            document.getElementById('convertToImage').addEventListener('click', async () => {
+                            document.getElementById('convertToImage2').addEventListener('click', async () => {
                                 let arrayBuffer;
 
                                 if (fileInput.files[0]) {
