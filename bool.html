@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base Conversion & Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .custom-base-group {
+            display: flex;
+            gap: 10px;
+        }
+        .result {
+            margin-top: 20px;
+            background: #e7f3ff;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .subscript {
+            font-size: smaller;
+            vertical-align: sub;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Base Converter & Calculator</h1>
+
+        <!-- Base Converter -->
+        <h2>Base Conversion</h2>
+        <div class="form-group">
+            <label for="binary">Binary (Base 2):</label>
+            <input type="text" id="binary" placeholder="Enter binary value" oninput="updateBaseValues('binary')">
+        </div>
+        <div class="form-group">
+            <label for="octal">Octal (Base 8):</label>
+            <input type="text" id="octal" placeholder="Enter octal value" oninput="updateBaseValues('octal')">
+        </div>
+        <div class="form-group">
+            <label for="decimal">Decimal (Base 10):</label>
+            <input type="text" id="decimal" placeholder="Enter decimal value" oninput="updateBaseValues('decimal')">
+        </div>
+        <div class="form-group">
+            <label for="hex">Hexadecimal (Base 16):</label>
+            <input type="text" id="hex" placeholder="Enter hexadecimal value" oninput="updateBaseValues('hex')">
+        </div>
+        <div class="form-group">
+            <label for="customBase">Custom Base:</label>
+            <div class="custom-base-group">
+                <input type="text" id="customBaseValue" placeholder="Enter value" oninput="updateBaseValues('customBase')">
+                <input type="number" id="customBaseRadix" min="2" max="36" placeholder="Radix (Base)" oninput="updateBaseValues('customBase')">
+            </div>
+        </div>
+
+        <!-- Arithmetic Calculator -->
+        <h2>Arithmetic Calculator</h2>
+        <div class="form-group">
+            <label for="num1">Number 1:</label>
+            <input type="text" id="num1" placeholder="Enter first number">
+        </div>
+        <div class="form-group">
+            <label for="num2">Number 2:</label>
+            <input type="text" id="num2" placeholder="Enter second number">
+        </div>
+        <div class="form-group">
+            <label for="operation">Operation:</label>
+            <select id="operation">
+                <option value="add">Addition (+)</option>
+                <option value="subtract">Subtraction (-)</option>
+                <option value="multiply">Multiplication (*)</option>
+                <option value="divide">Division (/)</option>
+            </select>
+        </div>
+        <button onclick="performCalculation()">Calculate</button>
+        <div class="result" id="calculationResult"></div>
+    </div>
+
+    <script>
+        function updateBaseValues(changedBase) {
+            let binary = document.getElementById("binary").value.trim();
+            let octal = document.getElementById("octal").value.trim();
+            let decimal = document.getElementById("decimal").value.trim();
+            let hex = document.getElementById("hex").value.trim();
+            let customValue = document.getElementById("customBaseValue").value.trim();
+            let customRadix = parseInt(document.getElementById("customBaseRadix").value, 10);
+
+            let decimalValue;
+
+            try {
+                if (changedBase === 'binary') {
+                    decimalValue = parseInt(binary, 2);
+                } else if (changedBase === 'octal') {
+                    decimalValue = parseInt(octal, 8);
+                } else if (changedBase === 'decimal') {
+                    decimalValue = parseInt(decimal, 10);
+                } else if (changedBase === 'hex') {
+                    decimalValue = parseInt(hex, 16);
+                } else if (changedBase === 'customBase' && customRadix >= 2 && customRadix <= 36) {
+                    decimalValue = parseInt(customValue, customRadix);
+                } else {
+                    throw new Error("Invalid input or base");
+                }
+
+                if (isNaN(decimalValue)) throw new Error("Invalid input");
+
+                // Update other fields
+                if (changedBase !== 'binary') document.getElementById("binary").value = decimalValue.toString(2);
+                if (changedBase !== 'octal') document.getElementById("octal").value = decimalValue.toString(8);
+                if (changedBase !== 'decimal') document.getElementById("decimal").value = decimalValue.toString(10);
+                if (changedBase !== 'hex') document.getElementById("hex").value = decimalValue.toString(16).toUpperCase();
+                if (changedBase !== 'customBase') {
+                    document.getElementById("customBaseValue").value = decimalValue.toString(customRadix || 10);
+                }
+            } catch (error) {
+                console.error(error.message);
+                clearFields();
+            }
+        }
+
+        function clearFields() {
+            document.getElementById("binary").value = "";
+            document.getElementById("octal").value = "";
+            document.getElementById("decimal").value = "";
+            document.getElementById("hex").value = "";
+            document.getElementById("customBaseValue").value = "";
+        }
+
+        function performCalculation() {
+            const num1 = parseInt(document.getElementById("num1").value, 10);
+            const num2 = parseInt(document.getElementById("num2").value, 10);
+            const operation = document.getElementById("operation").value;
+
+            if (isNaN(num1) || isNaN(num2)) {
+                document.getElementById("calculationResult").innerText = "Error: Invalid numbers!";
+                return;
+            }
+
+            let result;
+            switch (operation) {
+                case "add":
+                    result = num1 + num2;
+                    break;
+                case "subtract":
+                    result = num1 - num2;
+                    break;
+                case "multiply":
+                    result = num1 * num2;
+                    break;
+                case "divide":
+                    if (num2 === 0) {
+                        document.getElementById("calculationResult").innerText = "Error: Cannot divide by zero!";
+                        return;
+                    }
+                    result = num1 / num2;
+                    break;
+                default:
+                    document.getElementById("calculationResult").innerText = "Error: Invalid operation!";
+                    return;
+            }
+
+            document.getElementById("calculationResult").innerHTML = `Result: ${result}<sub>10</sub>`;
+        }
+    </script>
+</body>
+</html>

@@ -308,13 +308,13 @@
                                     originalFileName = file.name.split('.pdf')[0];
                                     arrayBuffer = await file.arrayBuffer();
                                 } else if (pdfUrl) {
-                                    originalFileName = pdfUrl.split('/').pop();
                                     try {
                                         arrayBuffer = await fetchPdfFromUrl(pdfUrl);
                                     } catch (error) {
                                         alert('Failed to fetch the PDF from the provided URL');
                                         return;
                                     }
+                                    originalFileName = pdfUrl.split('/').pop();
                                 } else {
                                     alert('Please upload a PDF file or provide a link to a PDF.');
                                     return;
