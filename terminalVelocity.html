@@ -1,173 +1,69 @@
 <!DOCTYPE html>
-<!--needs fixing-->
 <html lang="en">
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal Velocity Simulator</title>
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/bootstrap-theme.min.css">
-    <script src="js/jquery.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    
-    <style type="text/css">
-    
-        
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.bundle.min.js"></script>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .jumbotron {
+            background-color: #dcfba5 !important;
+            padding: 20px;
+        }
     </style>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.bundle.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.js"></script>
-<script language = "javascript" type = "text/javascript">
-
-var rho = [
-  ["Fresh Water", "Salt Water","Air", "Liquid Hydrogen", "Styrofoam", "Cork", "Lithium", "Wood", "Concrete", "Silicon", "Aluminum", "Iron", "Copper", "lead", "Gold" ],
-  [1000,1030, 1.2, 70, 75, 240, 535, 700, 2400, 2330, 2700, 7870, 8940, 11340, 19320 ]
-];
-
-var eta = [
-  ["water", "Methanol", "Mercury", "Glycerol", "Benzene", "Ethanol", "Air" ],
-  [0.00089,0.000544, 0.001526, 0.934, 0.000604, 0.001074, 18.5e-6  ]
-];
-</script>
-
-<title>Terminal Velocity Simulator</title>
-<link rel="icon" type="image/x-icon" href="img/favicon.png">
-
 </head>
 
-<nav class="navbar navbar-default navbar-fixed-top">
-    <div class="container-fluid">
-      <!-- Brand and toggle get grouped for better mobile display -->
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-          <span class="sr-only">Toggle navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <a class="navbar-brand" href="/"><img src="img/logo.png" alt="SHP's Most used toolset" height="30"></a>
-      </div>
-  
-      <!-- Collect the nav links, forms, and other content for toggling -->
-      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-        <ul class="nav navbar-nav">
-        <li><a href="/">Home</a></li>
-        <li><a href="resistor.html">Resistance</a></li>
-        
-        <li><a href="capacitor.html">Capacitance</a></li>
-        <li><a href="terminalVelocity.html">Terminal Velocity</a></li>
-        <li><a href="math.html">Math Tools</a></li>
-         
-  
-        </ul>
-        <!--
-        <form class="navbar-form navbar-left" role="search">
-          <div class="form-group">
-            <input type="text" class="form-control" placeholder="Search">
-          </div>
-          <button type="submit" class="btn btn-default">Submit</button>
-        </form>
-        -->
-        <!--
-        <ul class="nav navbar-nav navbar-right">
-          <li><a href="http://weather.shparvez.net/">Home page</a></li>
-          <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">More coming soon <span class="caret"></span></a>
-            <ul class="dropdown-menu" role="menu">
-              <li><a href="#">Action</a></li>
-              <li><a href="#">Another action</a></li>
-              <li><a href="#">Something else here</a></li>
-              <li class="divider"></li>
-              <li><a href="#">Separated link</a></li>
-            </ul>
-            -->
-          </li>
-        </ul>
-      </div><!-- /.navbar-collapse -->
-    </div><!-- /.container-fluid -->
-  </nav>
-  
-
 <body>
+    <nav class="navbar navbar-default navbar-fixed-top">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">Terminal Velocity Simulator</a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li><a href="/">Home</a></li>
+                <li><a href="resistor.html">Resistance</a></li>
+                <li><a href="capacitor.html">Capacitance</a></li>
+            </ul>
+        </div>
+    </nav>
 
-    <br><br><br>
-
-    <div class="container-fluid" style="position: relative">
-
-        <div class="row">
-
-
-
-            <div  class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
-                <div class="jumbotron">
-                <div  class="blog-post">
-                
-                
-                
-                <h1>Terminal Velocity Simulator</h1>
-                        <p class="lead">This simulation Estimates the terminal velocity of any spherical object falling through a fluid. Stokes law is used.</p>
-                
-                
-                <div class="container-fluid" style="color: black;  background: #dcfba5 !important;">
-                 <div class="col-xs-12 col-sm-6">
-                     
-                Density of solid in kg/m^3  <input id="rho_s" type="text" size="8" value="7870"  oninput="vTerm()"> 
-                
-                <select id="rho_ss" onchange="rhoSPush()">
-                    <option selected="selected" value=" ">Select</option>
-                <?php
-                    for ($i=0;$i<=14;$i++)
-                    {
-                        ?>
-                        
-                       <option value="<?php echo $i; ?>"><script>document.write(rho[0][<?php echo $i; ?>]);</script></option>
-                        
-                <?php
-                    }
-                ?>
-                    
-                    
-                    
-                    </select>
+    <div class="container" style="margin-top: 70px;">
+        <div class="jumbotron">
+            <h1>Terminal Velocity Simulator</h1>
+            <p>Estimate the terminal velocity of a spherical object falling through a fluid using Stokes' law.</p>
+            <div>
+                <label>Density of solid in kg/m<sup>3</sup>:</label>
+                <input id="rho_s" type="number" placeholder="7870" onchange="vTerm()">
+                <select id="rho_ss" onchange="setDensitySolid()">
+                    <option value="">Select</option>
+                </select>
                 <br>
-                
-                Density of fluid in kg/m^3  <input id="rho_f" type="text" size="8" value="1000" onkeyup="" oninput="vTerm()">
-                <select id="rho_ff" onchange="rhoFPush()">
-                    <option selected="selected" value=" ">Select</option>
-                <?php
-                    for ($i=0;$i<=14;$i++)
-                    {
-                        ?>
-                        
-                       <option value="<?php echo $i; ?>"><script>document.write(rho[0][<?php echo $i; ?>]);</script></option>
-                        
-                <?php
-                    }
-                ?>
-                    </select>
+
+                <label>Density of fluid in kg/m<sup>3</sup>:</label>
+                <input id="rho_f" type="number" placeholder="1000" onchange="vTerm()">
+                <select id="rho_ff" onchange="setDensityFluid()">
+                    <option value="">Select</option>
+                </select>
                 <br>
-                Viscosity of fluid in PaS   <input id="eta_f" type="text" size="8" value="0.001" onkeyup="" oninput="vTerm()"> 
-                <select id="eta_ff" onchange="etaFPush()">
-                    <option selected="selected" value=" ">Select</option>
-                <?php
-                    for ($i=0;$i<=6;$i++)
-                    {
-                        ?>
-                        
-                       <option value="<?php echo $i; ?>"><script>document.write(eta[0][<?php echo $i; ?>]);</script></option>
-                        
-                <?php
-                    }
-                ?>
-                    </select>
+
+                <label>Viscosity of fluid in Pa·s:</label>
+                <input id="eta_f" type="number" placeholder="0.001" onchange="vTerm()">
+                <select id="eta_ff" onchange="setViscosity()">
+                    <option value="">Select</option>
+                </select>
                 <br>
-                   
-                <p>Select the diameter in mm
+
+                <label>Select the diameter in mm:</label>
                 <select id="diameter" onchange="vTerm()">
-                    <option selected="selected" value=" ">Select</option>
+                    <option value="">Select</option>
                     <option value="2">2</option>
                     <option value="3">3</option>
                     <option value="4">4</option>
@@ -178,262 +74,146 @@ var eta = [
                     <option value="9">9</option>
                     <option value="10">10</option>
                 </select>
-                </p>
-                
-                
-                
-                
-                 <div id ='Resistance'></div>     
-                     
-                 </div>
-                 
-                 <div id="graph-container" class="col-xs-12 col-sm-6">
-                 
-                 </div>
-                
-                
-                </div>
-                <p>A good list of viscosities are available at https://en.wikipedia.org/wiki/List_of_viscosities</p>
-                <p>A good list of densities as available in https://en.wikipedia.org/wiki/Density#Densities</p>
-                
-                <P id="debug"> </P>
-                 
-                </div><!-- /Blog post -->
-                </div><!-- /Jumbotron -->
-                
-                
-                
-                      
-                      <script language = "javascript" type = "text/javascript">
-                         
-                            function vTerm(){
-                  resetCanvas();              
-                          
-                               var d = document.getElementById('diameter').value;
-                               var d=d/1000;
-                               var r=d/2;
-                               var pi=3.142;
-                               var g=9.81;
-                               var volume=(4/3)*pi*r**3;
-                               
-                               
-                               var time=[];
-                               var velocity=[];
-                               var distance=[];
-                               
-                               var rhoS = document.getElementById('rho_s').value;
-                               var rhoF = document.getElementById('rho_f').value;
-                               var eta = document.getElementById('eta_f').value;
-                               var mass=rhoS*volume;
-                               
-                               var t=0;
-                               velocity_i=0.00;
-                               distance_=0.00;
-                               var weight= rhoS*volume*g;
-                               var upthrust= rhoF*volume*g;
-                               var drag=6*pi*r*eta*velocity_i;
-                               var resultantForce=weight-upthrust-drag;
-                               var acceleration=resultantForce/mass;
-                               var velocity_f= velocity_i +acceleration*t;
-                               
-                   /*            */         
-                               for (t = 0; t <= 200; t++) {
-                                   velocity_i=velocity_f;
-                                   drag=6*pi*r*eta*velocity_i;
-                                   resultantForce=weight-upthrust-drag;
-                                   acceleration=resultantForce/mass;
-                                   acceleration=acceleration.toFixed(2);
-                                   distance_=distance_+velocity_i;
-                                   velocity_f= velocity_i + acceleration*1;
-                                   distance.push(distance_);
-                                   velocity.push(velocity_f);
-                                   time.push(t);
-                                }
-                                
-                                var timeToReachVTerm=velocity.indexOf(velocity_f)
-                               
-                               
-                               document.getElementById("Resistance").innerHTML = "Terminal velocity is: " + velocity_f.toFixed(2) 
-                               +"m/s<br>Distance Travelled is: " + distance_.toFixed(2) 
-                               +"m<br> Time to reach Terminal Velocity is "+timeToReachVTerm + "s"
-                               +"<br>Distance travelled before reaching Terminal Velocity is "+distance[timeToReachVTerm].toFixed(2)+"m";
-                
-                //myChart.destroy()
-                
-                var ctx = document.getElementById("velocityChart").getContext('2d');
-                var velocityChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: time,
-                        label:'Time',
-                        datasets: [{
-                            label: 'Velocity',
-                            fill: false,
-                            data: velocity,
-                            borderWidth: 1,
-                            borderColor: 'purple',
-                            pointRadius: 1
-                        }]
-                    },
-                    options: {
-                        scales: {
-                            xAxes: [{
-                                        display: true,
-                                        scaleLabel: {
-                                            display: true,
-                                            labelString: 'Time in second'
-                                        }
-                                    }],
-                             yAxes: [{
-                                        display: true,
-                                        scaleLabel: {
-                                            display: true,
-                                            labelString: 'Velocity in m/s'
-                                        },
-                                        ticks: {
-                                         //suggestedMin: 20,
-                                         //suggestedMax: 60, 
-                                         //stepSize: 5,
-                                         
-                                                },
-                                    }]
-                        }
+            </div>
+
+            <div id="results"></div>
+            <canvas id="velocityChart" width="400" height="200"></canvas>
+            <canvas id="distanceChart" width="400" height="200"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const rho = [
+            ["Fresh Water", "Salt Water", "Air", "Liquid Hydrogen", "Styrofoam", "Cork", "Lithium", "Wood", "Concrete", "Silicon", "Aluminum", "Iron", "Copper", "Lead", "Gold"],
+            [1000, 1030, 1.2, 70, 75, 240, 535, 700, 2400, 2330, 2700, 7870, 8940, 11340, 19320]
+        ];
+
+        const eta = [
+            ["Water", "Methanol", "Mercury", "Glycerol", "Benzene", "Ethanol", "Air"],
+            [0.00089, 0.000544, 0.001526, 0.934, 0.000604, 0.001074, 18.5e-6]
+        ];
+
+        // Populate dropdowns
+        function populateDropdowns() {
+            const rhoSolidDropdown = document.getElementById('rho_ss');
+            const rhoFluidDropdown = document.getElementById('rho_ff');
+            const etaDropdown = document.getElementById('eta_ff');
+
+            for (let i = 0; i < rho[0].length; i++) {
+                const optionSolid = new Option(rho[0][i], i);
+                const optionFluid = new Option(rho[0][i], i);
+                rhoSolidDropdown.add(optionSolid);
+                rhoFluidDropdown.add(optionFluid);
+            }
+
+            for (let i = 0; i < eta[0].length; i++) {
+                const option = new Option(eta[0][i], i);
+                etaDropdown.add(option);
+            }
+        }
+
+        // Set density and viscosity
+        function setDensitySolid() {
+            const index = document.getElementById('rho_ss').value;
+            document.getElementById('rho_s').value = rho[1][index];
+            vTerm();
+        }
+
+        function setDensityFluid() {
+            const index = document.getElementById('rho_ff').value;
+            document.getElementById('rho_f').value = rho[1][index];
+            vTerm();
+        }
+
+        function setViscosity() {
+            const index = document.getElementById('eta_ff').value;
+            document.getElementById('eta_f').value = eta[1][index];
+            vTerm();
+        }
+
+        // Calculate terminal velocity
+        function vTerm() {
+    const diameter = document.getElementById('diameter').value / 1000;
+    if (!diameter) return;
+
+    const radius = diameter / 2;
+    const rhoS = parseFloat(document.getElementById('rho_s').value);
+    const rhoF = parseFloat(document.getElementById('rho_f').value);
+    const etaValue = parseFloat(document.getElementById('eta_f').value);
+
+    const g = 9.81;
+    const volume = (4 / 3) * Math.PI * Math.pow(radius, 3);
+    const weight = rhoS * volume * g;
+    const upthrust = rhoF * volume * g;
+
+    let velocity = [];
+    let time = [];
+    let distance = [];
+    let velocity_i = 0;
+    let distance_ = 0;
+    const mass = rhoS * volume;
+
+    const theoreticalTerminalVelocity = (2 / 9) * (radius ** 2) * g * (rhoS - rhoF) / etaValue; // Stokes' Law
+    const threshold = 0.999 * theoreticalTerminalVelocity; // 99% of terminal velocity
+    let timeToTerminal = null;
+    let distanceToTerminal = null;
+
+    for (let t = 0; t <= 200; t++) {
+        const drag = 6 * Math.PI * radius * etaValue * velocity_i;
+        const resultantForce = weight - upthrust - drag;
+        const acceleration = resultantForce / mass;
+        distance_ += velocity_i;
+        velocity_i += acceleration;
+
+        time.push(t);
+        velocity.push(velocity_i);
+        distance.push(distance_);
+
+        // Check when velocity reaches the threshold
+        if (timeToTerminal === null && velocity_i >= threshold) {
+            timeToTerminal = t;
+            distanceToTerminal = distance_;
+        }
+    }
+
+    const terminalVelocity = velocity[velocity.length - 1].toFixed(2);
+
+    document.getElementById('results').innerHTML = `
+        <p><b>Theoretical Terminal Velocity:</b> ${terminalVelocity} m/s</p>
+        <p><b>Time to Reach Terminal Velocity:</b> ${timeToTerminal} s</p>
+        <p><b>Distance Traveled Before Reaching Terminal Velocity:</b> ${distanceToTerminal.toFixed(2)} m</p>
+        <p><b>Total Distance:</b> ${distance[distance.length - 1].toFixed(2)} m</p>
+    `;
+
+    plotGraph('velocityChart', time, velocity, 'Velocity (m/s)');
+    plotGraph('distanceChart', time, distance, 'Distance (m)');
+}
+
+
+        function plotGraph(canvasId, labels, data, label) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: label,
+                        data: data,
+                        borderColor: 'purple',
+                        fill: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        xAxes: [{ scaleLabel: { display: true, labelString: 'Time (s)' } }],
+                        yAxes: [{ scaleLabel: { display: true, labelString: label } }]
                     }
-                });
-                
-                var ctx = document.getElementById("distanceChart").getContext('2d');
-                var distanceChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: time,
-                        label:'Time',
-                        datasets: [{
-                            label: 'Distance',
-                            fill: false,
-                            data: distance,
-                            borderWidth: 1,
-                            borderColor: 'purple',
-                            pointRadius: 1
-                        }]
-                    },
-                    options: {
-                        scales: {
-                            xAxes: [{
-                                        display: true,
-                                        scaleLabel: {
-                                            display: true,
-                                            labelString: 'Time in second'
-                                        }
-                                    }],
-                             yAxes: [{
-                                        display: true,
-                                        scaleLabel: {
-                                            display: true,
-                                            labelString: 'Distance in m'
-                                        },
-                                        ticks: {
-                                         //suggestedMin: 20,
-                                         //suggestedMax: 60, 
-                                         //stepSize: 5,
-                                         
-                                                },
-                                    }]
-                        }
-                    }
-                });
-                
-                
-                //Closing bracket for vTerm function
                 }
-                
-                
-                
-                // the following code does not works.
-                var resetCanvas = function(){
-                  $('#velocityChart').remove(); // this is my <canvas> element
-                  $('#distanceChart').remove();
-                  $('#graph-container').append('<canvas id="velocityChart" width="500" height="500" onfocus="vTerm()"></canvas> <canvas id="distanceChart" width="500" height="500" onfocus="vTerm()"></canvas>');
-                  //canvas = document.querySelector('#myChart');
-                  //ctx = canvas.getContext('2d');
-                  //ctx.canvas.width = $('#graph').width(); // resize to parent width
-                  //ctx.canvas.height = $('#graph').height(); // resize to parent height
-                  //var x = canvas.width/2;
-                  //var y = canvas.height/2;
-                  //ctx.font = '10pt Verdana';
-                  //ctx.textAlign = 'center';
-                  //ctx.fillText('This text is centered on the canvas', x, y);
-                };
-                
-                </script>
-                
-                <script language = "javascript" type = "text/javascript">
-                
-                
-                
-                
-                
-                
-                //console.log(rho[0][0]); // 1
-                //console.log(rho);
-                
-                
-                
-                
-                
-                function rhoSPush() 
-                {
-                    var d = document.getElementById('rho_ss').value;
-                    
-                    document.getElementById("rho_s").value =  rho[1][d] ;
-                   // document.getElementById("debug").innerHTML =  rho[1][d] ;
-                }
-                
-                function rhoFPush() 
-                {
-                    var d = document.getElementById('rho_ff').value;
-                    
-                    document.getElementById("rho_f").value =  rho[1][d] ;
-                   // document.getElementById("debug").innerHTML =  rho[1][d] ;
-                }
-                
-                function etaFPush() 
-                {
-                    var d = document.getElementById('eta_ff').value;
-                    
-                    document.getElementById("eta_f").value =  eta[1][d] ;
-                   // document.getElementById("debug").innerHTML =  rho[1][d] ;
-                }
-                
-                
-                </script>
-            </div><!-- /inner main content container -->
-            <br><br>
+            });
+        }
 
-
-            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3 sidebar">
-
-
-                <!--<?php include 'time.php'; ?>-->
-                <!--<?php include 'sharer.php'; ?>-->
-
-            </div><!-- /sidebar -->
-
-
-        </div> <!-- /row -->
-
-        <br><br><br><br>
-
-
-        <div class="jumbotron4">
-
-
-
-            copyright SHP @ 2024
-        </div> <!-- /footer div -->
-
-    </div> <!-- /container -->
-
-
+        window.onload = populateDropdowns;
+    </script>
 </body>
 
 </html>
