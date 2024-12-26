@@ -221,10 +221,23 @@
                         
                             <div class="dropdown-section">
                               <label for="hashAlgorithm">Choose Hash Algorithm:</label>
-                              <select id="hashAlgorithm">
+                              <!-- <select id="hashAlgorithm">
                                 <option value="SHA-256">SHA-256</option>
                                 <option value="SHA-1">SHA-1</option>
                                 <option value="MD5">MD5</option>
+                              </select> -->
+                              <select id="hashAlgorithm">
+                                <option value="SHA-256">SHA-256</option>
+                                <option value="SHA-1">SHA-1</option>
+                                <option value="SHA-512">SHA-512</option>
+                                <option value="SHA-384">SHA-384</option>
+                                <option value="SHA-224">SHA-224</option>
+                                <option value="MD5">MD5</option>
+                                <option value="SHA3-256">SHA3-256</option>
+                                <option value="SHA3-512">SHA3-512</option>
+                                <option value="BLAKE2b">BLAKE2b</option>
+                                <option value="RIPEMD-160">RIPEMD-160</option>
+                                <option value="Whirlpool">Whirlpool</option>
                               </select>
                             </div>
                         
@@ -275,11 +288,34 @@
                 </div>
             </div>
         </div>    
+        <!-- Include external libraries for unsupported algorithms -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/js-md5/0.7.3/js/md5.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha3/0.8.0/sha3.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/blakejs@1.1.0/blake2b.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ripemd160/2.0.2/ripemd160.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/whirlpool/1.0.0/whirlpool.min.js"></script>
         <script>
             async function generateHash(data, algorithm) {
-                const hashBuffer = await crypto.subtle.digest(algorithm, data);
-                const hashArray = Array.from(new Uint8Array(hashBuffer));
-                return hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+                // const hashBuffer = await crypto.subtle.digest(algorithm, data);
+                // const hashArray = Array.from(new Uint8Array(hashBuffer));
+                // return hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+                let hash;
+                try {
+                    if (algorithm === 'MD5') {
+                        console.log("MD5 detected");
+                        
+                        //hash = md5(inputText);  // Using js-md5 library
+                    } else {
+                        // Fallback to native crypto.subtle.digest
+                        const hashBuffer = await crypto.subtle.digest(algorithm, data);
+                        const hashArray = Array.from(new Uint8Array(hashBuffer));
+                        return hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+                    }
+                    } catch (error) {
+                    console.error("An error occurred:", error.message);
+                    alert("Error ocurred during hash calculation");
+                        console.log("Execution completed.");
+                    }
             }
     
             document.getElementById("generateButton").addEventListener("click", async () => {
@@ -311,7 +347,9 @@
                 document.getElementById("outputHash").value = hash;
                 hashSource.innerText = sourceMessage;
             });
-    
+
+
+            //Copy function
             document.getElementById("copyButton").addEventListener("click", () => {
                 const outputHash = document.getElementById("outputHash");
                 outputHash.select();
