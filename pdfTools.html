@@ -978,7 +978,7 @@ document.getElementById("splitButton").addEventListener("click", async () => {
                         <input type="file" id="imageFiles" accept="image/*" multiple class="file-input"/>
                         <div class="preview" id="previewContainer"></div>
                         <button id="convertButton">Convert to PDF</button>  
-                        <button id="clearButton">Clear Images</button>                      
+                        <button id="clearButton2">Clear Images</button>                      
                     </div>
                 </div>
                 <script>
@@ -986,7 +986,7 @@ document.getElementById("splitButton").addEventListener("click", async () => {
                     const imageFiles = [];
                                     
                     document.getElementById('imageFiles').addEventListener('change', handleFileSelect);
-                    document.getElementById('clearButton').addEventListener('click', clearImages); // Clear button event
+                    document.getElementById('clearButton2').addEventListener('click', clearImages); // Clear button event
                 
                     function handleFileSelect(event) {
                         const files = Array.from(event.target.files);
