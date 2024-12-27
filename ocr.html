@@ -248,6 +248,7 @@
 
                             <div id="imageUploadOrPaste">
                             <button onclick="performOCR()" class="ocr-button">Start OCR</button>
+                            <button id="pasteImageButton" class="ocr-button">Paste Image</button>
                             </div>
 
                             <p>Or paste an image directly from clipboard</p>
@@ -412,6 +413,32 @@
       displayImagePreview(file); // Show the preview
     }
   });
+
+  document.getElementById('pasteImageButton').addEventListener('click', async () => {
+    const output = document.getElementById('output');
+    
+    try {
+        // Request permission to access clipboard data
+        const clipboardItems = await navigator.clipboard.read();
+        for (const item of clipboardItems) {
+            // Look for an image in the clipboard items
+            if (item.types.includes('image/png') || item.types.includes('image/jpeg')) {
+                const blob = await item.getType('image/png');
+                const file = new File([blob], 'clipboard-image.png', { type: 'image/png' });
+
+                imageFromClipboard = file; // Store the image file
+                displayImagePreview(file); // Display the preview
+                output.innerHTML = 'Image pasted successfully. Click "Start OCR" to process the image.';
+                return;
+            }
+        }
+        output.innerHTML = 'No image found in clipboard.';
+    } catch (err) {
+        console.error('Error accessing clipboard:', err);
+        output.innerHTML = 'Error: Unable to access clipboard. Please allow clipboard permissions.';
+    }
+});
+
   
   // Function to draw a placeholder on the canvas
 function drawOnCanvas() {
