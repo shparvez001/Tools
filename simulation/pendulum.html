@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pendulum Simulation</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f0f0f0;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        canvas {
+            background: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .control {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .control label {
+            margin-right: 10px;
+            flex: 1;
+        }
+        .control input {
+            flex: 2;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            background: #007BFF;
+            color: #fff;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <!-- <h1>Pendulum Simulation</h1> -->
+    <div class="container">
+        <canvas id="pendulumCanvas"></canvas>
+        <div class="controls">
+            <div class="control">
+                <label for="lengthSlider">Length:</label>
+                <input type="range" id="lengthSlider" min="100" max="400" value="250">
+                <span id="lengthValue">250</span> px
+            </div>
+            <div class="control">
+                <label for="angleSlider">Initial Angle:</label>
+                <input type="range" id="angleSlider" min="-90" max="90" value="45">
+                <span id="angleValue">45</span>°
+            </div>
+            <div class="control">
+                <label for="gravitySlider">Gravity:</label>
+                <input type="range" id="gravitySlider" min="0.1" max="10" step="0.1" value="0.4">
+                <span id="gravityValue">0.4</span> m/s²
+            </div>
+            <div class="control">
+                <label for="dampingSlider">Damping:</label>
+                <input type="range" id="dampingSlider" min="0.9" max="1" step="0.01" value="0.99">
+                <span id="dampingValue">0.99</span>
+            </div>
+            <button id="restartButton">Restart</button>
+        </div>
+    </div>
+    <script>
+        // Get the canvas and context
+        const canvas = document.getElementById('pendulumCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Set canvas size
+        canvas.width = 500;
+        canvas.height = 600;
+
+        // Pendulum properties
+        const originX = canvas.width / 2; // Origin point (x)
+        const originY = 200;             // Origin point (y)
+        let length = 250;                // Length of the pendulum string
+        let angle = Math.PI / 4;         // Initial angle (in radians)
+        let angleVelocity = 0;           // Angular velocity
+        let angleAcceleration = 0;       // Angular acceleration
+        let gravity = 0.4;               // Gravitational constant
+        let damping = 0.99;              // Damping factor
+
+        // Get the sliders and display elements
+        const lengthSlider = document.getElementById('lengthSlider');
+        const angleSlider = document.getElementById('angleSlider');
+        const gravitySlider = document.getElementById('gravitySlider');
+        const dampingSlider = document.getElementById('dampingSlider');
+        const lengthValue = document.getElementById('lengthValue');
+        const angleValue = document.getElementById('angleValue');
+        const gravityValue = document.getElementById('gravityValue');
+        const dampingValue = document.getElementById('dampingValue');
+        const restartButton = document.getElementById('restartButton');
+
+        // Update properties from sliders
+        lengthSlider.addEventListener('input', () => {
+            length = parseInt(lengthSlider.value, 10);
+            lengthValue.textContent = length;
+        });
+
+        angleSlider.addEventListener('input', () => {
+            angle = (parseInt(angleSlider.value, 10) * Math.PI) / 180;
+            angleValue.textContent = angleSlider.value;
+        });
+
+        gravitySlider.addEventListener('input', () => {
+            gravity = parseFloat(gravitySlider.value);
+            gravityValue.textContent = gravity.toFixed(1);
+        });
+
+        dampingSlider.addEventListener('input', () => {
+            damping = parseFloat(dampingSlider.value);
+            dampingValue.textContent = damping.toFixed(2);
+        });
+
+        restartButton.addEventListener('click', () => {
+            // Reset pendulum state
+            angle = Math.PI / 4;
+            angleVelocity = 0;
+        });
+
+        function drawPendulum() {
+            // Calculate pendulum bob's position
+            const bobX = originX + length * Math.sin(angle);
+            const bobY = originY + length * Math.cos(angle);
+
+            // Clear the canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw the pendulum string
+            ctx.beginPath();
+            ctx.moveTo(originX, originY);
+            ctx.lineTo(bobX, bobY);
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Draw the pendulum bob
+            ctx.beginPath();
+            ctx.arc(bobX, bobY, 20, 0, Math.PI * 2);
+            ctx.fillStyle = '#007BFF';
+            ctx.fill();
+            ctx.strokeStyle = '#000';
+            ctx.stroke();
+        }
+
+        function updatePhysics() {
+            // Compute angular acceleration based on gravity and angle
+            angleAcceleration = (-gravity / length) * Math.sin(angle);
+
+            // Update angular velocity and angle
+            angleVelocity += angleAcceleration;
+            angleVelocity *= damping; // Damping
+            angle += angleVelocity;
+        }
+
+        function animate() {
+            updatePhysics();
+            drawPendulum();
+            requestAnimationFrame(animate);
+        }
+
+        // Start the animation
+        animate();
+    </script>
+</body>
+</html>
