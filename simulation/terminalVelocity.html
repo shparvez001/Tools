@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal Velocity Simulation</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            display: flex;
+            /* justify-content: space-between; */
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 20px;
+        }
+        .canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        canvas {
+            background: #ffffff;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            justify-content: flex-start;
+        }
+        .controls > div, .controls > button {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        label {
+            font-size: 14px;
+        }
+        .graph-container {
+            display: none;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="canvas-container">
+        <canvas id="terminalCanvas"></canvas>
+    </div>
+    <div class="controls">
+        <div>
+            <label for="solid">Type of Solid:</label>
+            <select id="solid">
+                <option value="steel">Steel</option>
+                <option value="wood">Wood</option>
+                <option value="rubber">Rubber</option>
+            </select>
+        </div>
+        <div>
+            <label for="fluid">Type of Fluid:</label>
+            <select id="fluid">
+                <option value="air">Air</option>
+                <option value="water">Water</option>
+                <option value="oil">Oil</option>
+            </select>
+        </div>
+        <div>
+            <label for="diameter">Diameter (m):</label>
+            <input type="number" id="diameter" value="0.5" step="0.01" min="0.1">
+        </div>
+        <div>
+            <label for="showGraph">Show Velocity-Time Graph:</label>
+            <input type="checkbox" id="showGraph">
+        </div>
+        <button id="restartButton">Restart</button>
+    </div>
+
+    <div class="graph-container">
+        <canvas id="graphCanvas"></canvas>
+    </div>
+
+    <script>
+        // Main simulation canvas
+        const canvas = document.getElementById("terminalCanvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = 400;
+        canvas.height = 600;
+
+        // Graph canvas
+        const graphCanvas = document.getElementById("graphCanvas");
+        const graphCtx = graphCanvas.getContext("2d");
+        graphCanvas.width = 400;
+        graphCanvas.height = 300;
+
+        // Physical constants
+        const g = 20; // Gravity (m/s²) for faster simulation
+        const solids = {
+            steel: { density: 7850, dragCoefficient: 0.47 },
+            wood: { density: 700, dragCoefficient: 0.5 },
+            rubber: { density: 1100, dragCoefficient: 0.6 },
+        };
+        const fluids = {
+            air: { density: 1.225 },
+            water: { density: 1000 },
+            oil: { density: 850 },
+        };
+
+        // Object properties
+        let solidType = "steel";
+        let fluidType = "air";
+        let diameter = 0.5;
+        let mass, dragCoefficient, area, fluidDensity;
+
+        // Simulation variables
+        let velocity = 0; // Current velocity (m/s)
+        let yPos = 0; // Y position (in canvas)
+        const dt = 0.05; // Time step (s)
+
+        // Graph variables
+        let showGraph = false;
+        let timeElapsed = 0; // Time counter
+        const velocityData = []; // Store velocity for graph
+
+        // DOM Elements
+        const solidInput = document.getElementById("solid");
+        const fluidInput = document.getElementById("fluid");
+        const diameterInput = document.getElementById("diameter");
+        const restartButton = document.getElementById("restartButton");
+        const showGraphInput = document.getElementById("showGraph");
+        const graphContainer = document.querySelector(".graph-container");
+
+        // Event listeners
+        solidInput.addEventListener("change", updateProperties);
+        fluidInput.addEventListener("change", updateProperties);
+        diameterInput.addEventListener("input", updateProperties);
+        restartButton.addEventListener("click", resetSimulation);
+        showGraphInput.addEventListener("change", toggleGraph);
+
+        function updateProperties() {
+            solidType = solidInput.value;
+            fluidType = fluidInput.value;
+            diameter = parseFloat(diameterInput.value);
+
+            // Calculate properties
+            const radius = diameter / 2;
+            area = Math.PI * radius * radius; // Cross-sectional area (m²)
+            mass = solids[solidType].density * (4 / 3) * Math.PI * Math.pow(radius, 3); // Volume * density
+            dragCoefficient = solids[solidType].dragCoefficient;
+            fluidDensity = fluids[fluidType].density;
+
+            resetSimulation();
+        }
+
+        function resetSimulation() {
+            velocity = 0;
+            yPos = 0;
+            timeElapsed = 0;
+            velocityData.length = 0; // Clear graph data
+        }
+
+        function toggleGraph() {
+            showGraph = showGraphInput.checked;
+            graphContainer.style.display = showGraph ? "block" : "none";
+        }
+
+        function calculateTerminalVelocity() {
+            return Math.sqrt((2 * mass * g) / (fluidDensity * dragCoefficient * area));
+        }
+
+        function updatePhysics() {
+            const terminalVelocity = calculateTerminalVelocity();
+            const dragForce = 0.5 * fluidDensity * dragCoefficient * area * velocity * velocity;
+            const netForce = mass * g - dragForce;
+            const acceleration = netForce / mass;
+
+            // Update velocity
+            if (velocity < terminalVelocity) {
+                velocity += acceleration * dt;
+            }
+
+            // Update position
+            yPos += velocity * dt;
+
+            // Record data for graph
+            if (showGraph) {
+                timeElapsed += dt;
+                velocityData.push({ time: timeElapsed, velocity });
+            }
+
+            // Reset position if the object falls out of the canvas
+            if (yPos > canvas.height) {
+                yPos = 0;
+                velocity = 0;
+            }
+        }
+
+        function drawObject() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw falling object
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, yPos, 10, 0, Math.PI * 2);
+            ctx.fillStyle = "#007BFF";
+            ctx.fill();
+            ctx.strokeStyle = "#000";
+            ctx.stroke();
+
+            // Draw text
+            ctx.fillStyle = "#000";
+            ctx.font = "14px Arial";
+            ctx.fillText(`Velocity: ${velocity.toFixed(2)} m/s`, 10, 20);
+            ctx.fillText(`Terminal Velocity: ${calculateTerminalVelocity().toFixed(2)} m/s`, 10, 40);
+        }
+
+        function drawGraph() {
+            graphCtx.clearRect(0, 0, graphCanvas.width, graphCanvas.height);
+
+            // Draw axes
+            graphCtx.beginPath();
+            graphCtx.moveTo(50, 10);
+            graphCtx.lineTo(50, graphCanvas.height - 30);
+            graphCtx.lineTo(graphCanvas.width - 10, graphCanvas.height - 30);
+            graphCtx.stroke();
+
+            // Draw velocity-time curve
+            graphCtx.beginPath();
+            graphCtx.strokeStyle = "#007BFF";
+            velocityData.forEach((point, index) => {
+                const x = 50 + point.time * 30; // Scale time
+                const y = graphCanvas.height - 30 - point.velocity * 10; // Scale velocity
+                if (index === 0) graphCtx.moveTo(x, y);
+                else graphCtx.lineTo(x, y);
+            });
+            graphCtx.stroke();
+        }
+
+        function animate() {
+            updatePhysics();
+            drawObject();
+
+            if (showGraph) {
+                drawGraph();
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // Initialize the simulation
+        updateProperties();
+        animate();
+    </script>
+</body>
+</html>
