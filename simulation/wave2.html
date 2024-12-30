@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Longitudinal Wave Simulation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            flex-direction: column;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            background-color: #fff;
+            margin-bottom: 20px;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+        label {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Canvas for Longitudinal Wave -->
+<canvas id="waveCanvas" width="800" height="200"></canvas>
+
+<!-- Controls for Amplitude and Frequency -->
+<div class="controls">
+    <div>
+        <label for="amplitude">Amplitude:</label>
+        <input type="range" id="amplitude" min="5" max="50" step="1" value="25">
+        <span id="amplitudeValue">25</span>
+    </div>
+    <div>
+        <label for="frequency">Frequency:</label>
+        <input type="range" id="frequency" min="1" max="30" step="1" value="10">
+        <span id="frequencyValue">10</span>
+    </div>
+</div>
+
+<div class="controls">
+    <button id="restartButton">Restart Simulation</button>
+    <button id="toggleButton">Stop Animation</button>
+</div>
+
+<script>
+    const waveCanvas = document.getElementById('waveCanvas');
+    const ctx = waveCanvas.getContext('2d');
+
+    const amplitudeSlider = document.getElementById('amplitude');
+    const amplitudeValue = document.getElementById('amplitudeValue');
+    const frequencySlider = document.getElementById('frequency');
+    const frequencyValue = document.getElementById('frequencyValue');
+    const restartButton = document.getElementById('restartButton');
+    const toggleButton = document.getElementById('toggleButton');
+
+    let time = 0;
+    let isAnimating = true;
+    let animationFrameId;
+
+    // Array to store air particles
+    const particles = [];
+    const particleCount = 100;
+    const particleSpacing = waveCanvas.width / particleCount;
+
+    // Create air particles (initialize with positions)
+    for (let i = 0; i < particleCount; i++) {
+        particles.push({
+            x: i * particleSpacing,
+            y: waveCanvas.height / 2,  // Centered vertically
+            displacement: 0
+        });
+    }
+
+    // Update amplitude and frequency values when sliders change
+    amplitudeSlider.addEventListener('input', () => {
+        amplitudeValue.textContent = amplitudeSlider.value;
+    });
+    frequencySlider.addEventListener('input', () => {
+        frequencyValue.textContent = frequencySlider.value;
+    });
+
+    // Function to draw the wave and particles
+    function drawWaveAndParticles(amplitude, frequency) {
+        ctx.clearRect(0, 0, waveCanvas.width, waveCanvas.height);
+
+        const waveLength = waveCanvas.width / frequency;  // Calculate wave length based on frequency
+        const waveNumber = 2 * Math.PI / waveLength;
+        const angularFrequency = 2 * Math.PI * frequency;
+
+        // Draw the wave and air particles (illustrating compression and rarefaction)
+        particles.forEach((particle, index) => {
+            // Sine wave function: calculate the displacement of each particle along the x-axis
+            const displacement = amplitude * Math.sin(waveNumber * particle.x - time * angularFrequency);
+            particle.x = (index * particleSpacing) + displacement;
+
+            // Draw air particles (represented as circles)
+            ctx.beginPath();
+            ctx.arc(particle.x, waveCanvas.height / 2, 5, 0, Math.PI * 2);
+            ctx.fillStyle = "#0000FF";
+            ctx.fill();
+        });
+
+        time += 0.05;
+
+        if (isAnimating) {
+            animationFrameId = requestAnimationFrame(() => drawWaveAndParticles(amplitude, frequency));
+        }
+    }
+
+    // Function to restart the simulation
+    function restartSimulation() {
+        time = 0;
+        drawWaveAndParticles(parseInt(amplitudeSlider.value), parseInt(frequencySlider.value));
+    }
+
+    // Function to toggle the animation
+    function toggleAnimation() {
+        if (isAnimating) {
+            isAnimating = false;
+            cancelAnimationFrame(animationFrameId);
+            toggleButton.textContent = 'Resume Animation';
+        } else {
+            isAnimating = true;
+            drawWaveAndParticles(parseInt(amplitudeSlider.value), parseInt(frequencySlider.value));
+            toggleButton.textContent = 'Stop Animation';
+        }
+    }
+
+    // Start the simulation on initial load
+    restartSimulation();
+
+    // Restart button functionality
+    restartButton.addEventListener('click', restartSimulation);
+
+    // Toggle stop/resume functionality
+    toggleButton.addEventListener('click', toggleAnimation);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wave Simulation: Traveling and Standing Waves</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            flex-direction: column;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            background-color: #fff;
+            margin-bottom: 20px;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+        label {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Canvas for Traveling Wave -->
+<canvas id="travelingCanvas" width="800" height="200"></canvas>
+
+<!-- Canvas for Standing Wave -->
+<canvas id="standingCanvas" width="800" height="200"></canvas>
+
+<!-- Controls for Amplitude and Frequency -->
+<div class="controls">
+    <div>
+        <label for="amplitude">Amplitude:</label>
+        <input type="range" id="amplitude" min="5" max="50" step="1" value="25">
+        <span id="amplitudeValue">25</span>
+    </div>
+    <div>
+        <label for="frequency">Frequency:</label>
+        <input type="range" id="frequency" min="1" max="30" step="1" value="7">
+        <span id="frequencyValue">7</span>
+    </div>
+</div>
+
+<div class="controls">
+    <button id="restartButton">Restart Simulation</button>
+    <button id="toggleButton">Stop Animation</button>
+</div>
+
+<script>
+    const travelingCanvas = document.getElementById('travelingCanvas');
+    const standingCanvas = document.getElementById('standingCanvas');
+    const ctxTraveling = travelingCanvas.getContext('2d');
+    const ctxStanding = standingCanvas.getContext('2d');
+
+    const amplitudeSlider = document.getElementById('amplitude');
+    const amplitudeValue = document.getElementById('amplitudeValue');
+    const frequencySlider = document.getElementById('frequency');
+    const frequencyValue = document.getElementById('frequencyValue');
+    const restartButton = document.getElementById('restartButton');
+    const toggleButton = document.getElementById('toggleButton');
+
+    let time = 0;
+    let isAnimating = true;
+    let animationFrameId; // To store the requestAnimationFrame ID for stopping the animation
+
+    // Update amplitude and frequency values when sliders change
+    amplitudeSlider.addEventListener('input', () => {
+        amplitudeValue.textContent = amplitudeSlider.value;
+    });
+    frequencySlider.addEventListener('input', () => {
+        frequencyValue.textContent = frequencySlider.value;
+    });
+
+    // Function to draw the traveling wave
+    function drawTravelingWave(amplitude, frequency) {
+        ctxTraveling.clearRect(0, 0, travelingCanvas.width, travelingCanvas.height);
+
+        const waveLength = travelingCanvas.width / frequency;  // Calculate wave length based on frequency
+        const waveNumber = 2 * Math.PI / waveLength;
+        const angularFrequency = 2 * Math.PI * frequency;
+
+        // Modify wave behavior for frequency wrapping
+        for (let i = 0; i < travelingCanvas.width; i++) {
+            // Calculate the displacement and wrap the wave if necessary
+            const displacement = amplitude * Math.sin(waveNumber * i - time * angularFrequency);
+            ctxTraveling.beginPath();
+            ctxTraveling.arc(i, travelingCanvas.height / 2 + displacement, 2, 0, Math.PI * 2);
+            ctxTraveling.fillStyle = "#0000FF";
+            ctxTraveling.fill();
+        }
+
+        time += 0.05;
+
+        if (isAnimating) {
+            animationFrameId = requestAnimationFrame(() => drawTravelingWave(amplitude, frequency));
+        }
+    }
+
+    // Function to draw the standing wave
+    function drawStandingWave(amplitude, frequency) {
+        ctxStanding.clearRect(0, 0, standingCanvas.width, standingCanvas.height);
+
+        const waveLength = standingCanvas.width / frequency;
+        const waveNumber = 2 * Math.PI / waveLength;
+        const angularFrequency = 2 * Math.PI * frequency;
+
+        // Modify wave behavior for frequency wrapping
+        for (let i = 0; i < standingCanvas.width; i++) {
+            const displacementStanding = amplitude * Math.sin(waveNumber * i) * Math.cos(time * angularFrequency);
+            ctxStanding.beginPath();
+            ctxStanding.arc(i, standingCanvas.height / 2 + displacementStanding, 2, 0, Math.PI * 2);
+            ctxStanding.fillStyle = "#00FF00";
+            ctxStanding.fill();
+        }
+
+        time += 0.05;
+
+        if (isAnimating) {
+            animationFrameId = requestAnimationFrame(() => drawStandingWave(amplitude, frequency));
+        }
+    }
+
+    // Function to restart the simulation
+    function restartSimulation() {
+        time = 0;
+        drawTravelingWave(parseInt(amplitudeSlider.value), parseInt(frequencySlider.value));
+        drawStandingWave(parseInt(amplitudeSlider.value), parseInt(frequencySlider.value));
+    }
+
+    // Function to toggle the animation
+    function toggleAnimation() {
+        if (isAnimating) {
+            isAnimating = false;
+            cancelAnimationFrame(animationFrameId);
+            toggleButton.textContent = 'Resume Animation';
+        } else {
+            isAnimating = true;
+            drawTravelingWave(parseInt(amplitudeSlider.value), parseInt(frequencySlider.value));
+            drawStandingWave(parseInt(amplitudeSlider.value), parseInt(frequencySlider.value));
+            toggleButton.textContent = 'Stop Animation';
+        }
+    }
+
+    // Start the simulation on initial load
+    restartSimulation();
+
+    // Restart button functionality
+    restartButton.addEventListener('click', restartSimulation);
+
+    // Toggle stop/resume functionality
+    toggleButton.addEventListener('click', toggleAnimation);
+</script>
+
+</body>
+</html>
