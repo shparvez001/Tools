@@ -5,65 +5,102 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simulation Index</title>
     <style>
+        /* General styles */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            background-color: #f0f0f0;
+            height: 100vh;
+            background-color: #f4f4f4;
         }
         header {
             background-color: #0078d7;
             color: white;
-            width: 100%;
-            padding: 10px;
+            padding: 10px 15px;
             text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
+        /* Container layout */
         .container {
             display: flex;
-            width: 100%;
-            max-width: 1200px;
-            margin: 20px auto;
+            flex: 1;
+            overflow: hidden;
         }
         .sidebar {
-            width: 25%;
+            width: 20%;
             background-color: #ffffff;
             border-right: 1px solid #ddd;
-            padding: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            overflow-y: auto;
+        }
+        .content {
+            flex: 1;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Sidebar links */
+        .sidebar h3 {
+            margin: 0 0 10px;
+            font-size: 1.2em;
+            color: #333;
         }
         .sidebar a {
             display: block;
             text-decoration: none;
             color: #0078d7;
-            margin-bottom: 8px;
-            padding: 5px 10px;
+            margin: 8px 0;
+            padding: 8px 10px;
             border-radius: 5px;
+            font-size: 0.95em;
+            transition: background-color 0.2s, color 0.2s;
         }
         .sidebar a:hover {
             background-color: #e6f7ff;
+            color: #0056b3;
         }
-        .content {
-            width: 75%;
-            padding: 10px;
-        }
+
+        /* Iframe styling */
         iframe {
             width: 100%;
-            height: 600px;
             border: none;
-            background-color: #fff;
+            flex: 1;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 30%;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .sidebar {
+                width: 40%;
+            }
+            header {
+                font-size: 1.2em;
+                padding: 10px;
+            }
         }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>Simulation Index</h1>
+    Simulation Index
 </header>
 
 <div class="container">
+    <!-- Sidebar -->
     <div class="sidebar">
         <h3>Simulations</h3>
         <!-- Update these links manually to match your file names -->
@@ -73,6 +110,8 @@
         <a href="#" data-file="wave2.html">Longitudinal Wave</a>
         <a href="#" data-file="terminalVelocity.html">Terminal Velocity</a>
     </div>
+
+    <!-- Content area -->
     <div class="content">
         <iframe id="simulationFrame" src=""></iframe>
     </div>
@@ -90,6 +129,17 @@
             iframe.src = file; // Set the iframe source to the selected file
         });
     });
+
+    // Adjust iframe height dynamically
+    function adjustIframeHeight() {
+        const headerHeight = document.querySelector('header').offsetHeight;
+        const availableHeight = window.innerHeight - headerHeight;
+        iframe.style.height = `${availableHeight}px`;
+    }
+
+    // Run the adjustment function on load and window resize
+    window.addEventListener('load', adjustIframeHeight);
+    window.addEventListener('resize', adjustIframeHeight);
 </script>
 
 </body>
