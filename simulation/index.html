@@ -15,6 +15,7 @@
             height: 100vh;
             background-color: #f4f4f4;
         }
+
         header {
             background-color: #0078d7;
             color: white;
@@ -23,14 +24,10 @@
             font-size: 1.5em;
             font-weight: bold;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
         }
 
-        /* Container layout */
-        .container {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
+        /* Sidebar styles */
         .sidebar {
             width: 20%;
             background-color: #ffffff;
@@ -38,13 +35,12 @@
             padding: 15px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
             overflow-y: auto;
+            transition: transform 0.3s ease, width 0.3s ease;
         }
-        .content {
-            flex: 1;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+
+        .sidebar.hidden {
+            transform: translateX(-100%);
+            width: 0;
         }
 
         /* Sidebar links */
@@ -53,6 +49,7 @@
             font-size: 1.2em;
             color: #333;
         }
+
         .sidebar a {
             display: block;
             text-decoration: none;
@@ -63,32 +60,64 @@
             font-size: 0.95em;
             transition: background-color 0.2s, color 0.2s;
         }
+
         .sidebar a:hover {
             background-color: #e6f7ff;
             color: #0056b3;
         }
 
-        /* Iframe styling */
+        /* Toggle button */
+        .toggle-btn {
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            font-size: 1em;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            border-radius: 5px;
+            z-index: 1001;
+        }
+
+        .toggle-btn:hover {
+            background-color: #003d80;
+        }
+
+        /* Content styles */
+        .container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .content {
+            flex: 1;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
         iframe {
             width: 100%;
             border: none;
             flex: 1;
+            transition: width 0.3s ease;
         }
 
-        /* Responsive design */
+        /* Responsive styles */
         @media (max-width: 768px) {
             .sidebar {
-                width: 30%;
+                position: absolute;
+                height: 100%;
+                z-index: 1000;
             }
-        }
 
-        @media (max-width: 576px) {
-            .sidebar {
-                width: 40%;
-            }
-            header {
-                font-size: 1.2em;
-                padding: 10px;
+            .sidebar.hidden {
+                position: absolute;
             }
         }
     </style>
@@ -96,6 +125,7 @@
 <body>
 
 <header>
+    <button class="toggle-btn">☰</button>
     Simulation Index
 </header>
 
@@ -103,12 +133,10 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <h3>Simulations</h3>
-        <!-- Update these links manually to match your file names -->
         <a href="#" data-file="pendulum.html">Pendulum Simulation</a>
-        <a href="#" data-file="brownian.html">Brownian Motion</a>
-        <a href="#" data-file="wave.html">Wave</a>
-        <a href="#" data-file="wave2.html">Longitudinal Wave</a>
-        <a href="#" data-file="terminalVelocity.html">Terminal Velocity</a>
+        <a href="#" data-file="brownian_motion.html">Brownian Motion</a>
+        <a href="#" data-file="longitudinal_wave.html">Longitudinal Wave</a>
+        <a href="#" data-file="standing_wave.html">Standing Wave</a>
     </div>
 
     <!-- Content area -->
@@ -118,8 +146,15 @@
 </div>
 
 <script>
+    const sidebar = document.querySelector('.sidebar');
+    const toggleBtn = document.querySelector('.toggle-btn');
     const links = document.querySelectorAll('.sidebar a');
     const iframe = document.getElementById('simulationFrame');
+
+    // Toggle sidebar visibility
+    toggleBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('hidden');
+    });
 
     // Add click event listener to all links
     links.forEach(link => {
@@ -127,6 +162,9 @@
             event.preventDefault(); // Prevent default link behavior
             const file = link.getAttribute('data-file'); // Get the file from data attribute
             iframe.src = file; // Set the iframe source to the selected file
+            if (window.innerWidth <= 768) {
+                sidebar.classList.add('hidden'); // Hide sidebar on small screens after selecting
+            }
         });
     });
 
