@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulation Index</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+        }
+        header {
+            background-color: #0078d7;
+            color: white;
+            width: 100%;
+            padding: 10px;
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            width: 100%;
+            max-width: 1200px;
+            margin: 20px auto;
+        }
+        .sidebar {
+            width: 25%;
+            background-color: #ffffff;
+            border-right: 1px solid #ddd;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar a {
+            display: block;
+            text-decoration: none;
+            color: #0078d7;
+            margin-bottom: 8px;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        .sidebar a:hover {
+            background-color: #e6f7ff;
+        }
+        .content {
+            width: 75%;
+            padding: 10px;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+            background-color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Simulation Index</h1>
+</header>
+
+<div class="container">
+    <div class="sidebar">
+        <h3>Simulations</h3>
+        <!-- Update these links manually to match your file names -->
+        <a href="#" data-file="pendulum.html">Pendulum Simulation</a>
+        <a href="#" data-file="brownian.html">Brownian Motion</a>
+        <a href="#" data-file="wave.html">Wave</a>
+        <a href="#" data-file="wave2.html">Longitudinal Wave</a>
+        <a href="#" data-file="terminalVelocity.html">Terminal Velocity</a>
+    </div>
+    <div class="content">
+        <iframe id="simulationFrame" src=""></iframe>
+    </div>
+</div>
+
+<script>
+    const links = document.querySelectorAll('.sidebar a');
+    const iframe = document.getElementById('simulationFrame');
+
+    // Add click event listener to all links
+    links.forEach(link => {
+        link.addEventListener('click', event => {
+            event.preventDefault(); // Prevent default link behavior
+            const file = link.getAttribute('data-file'); // Get the file from data attribute
+            iframe.src = file; // Set the iframe source to the selected file
+        });
+    });
+</script>
+
+</body>
+</html>
