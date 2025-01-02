@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHM Simulation</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #f0f0f0;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+            gap: 20px;
+        }
+        canvas {
+            background: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .controls label {
+            font-weight: bold;
+        }
+        .graph {
+            margin-top: 20px;
+        }
+        select, input[type="range"], button {
+            margin-top: 5px;
+            padding: 5px;
+            font-size: 14px;
+        }
+        button {
+            background: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Spring Simple Harmonic Motion</h1>
+    <div class="container">
+        <canvas id="animationCanvas" width="500" height="300"></canvas>
+        <div class="controls">
+            <label for="dampingType">Damping Type:</label>
+            <select id="dampingType">
+                <option value="underdamping">Underdamping</option>
+                <option value="critical">Critical Damping</option>
+                <option value="overdamping">Overdamping</option>
+            </select>
+            <label for="dampingSlider">Damping Coefficient:</label>
+            <input type="range" id="dampingSlider" min="0.0" max="2" step="0.1" value="0.5">
+            <span id="dampingValue">0.0</span>
+            <label for="springSlider">Spring Constant:</label>
+            <input type="range" id="springSlider" min="1" max="20" value="10">
+            <span id="springValue">10</span>
+            <label for="massSlider">Mass:</label>
+            <input type="range" id="massSlider" min="1" max="10" value="1">
+            <span id="massValue">1</span>
+            <button id="resetButton">Reset Simulation</button>
+        </div>
+    </div>
+    <canvas id="graphCanvas" width="600" height="200" class="graph"></canvas>
+
+    <script>
+        const animationCanvas = document.getElementById('animationCanvas');
+        const animationCtx = animationCanvas.getContext('2d');
+        const graphCanvas = document.getElementById('graphCanvas');
+        const graphCtx = graphCanvas.getContext('2d');
+
+        const dampingTypeSelect = document.getElementById('dampingType');
+        const dampingSlider = document.getElementById('dampingSlider');
+        const dampingValue = document.getElementById('dampingValue');
+        const springSlider = document.getElementById('springSlider');
+        const springValue = document.getElementById('springValue');
+        const massSlider = document.getElementById('massSlider');
+        const massValue = document.getElementById('massValue');
+        const resetButton = document.getElementById('resetButton');
+
+        dampingSlider.addEventListener('input', () => dampingValue.textContent = dampingSlider.value);
+        springSlider.addEventListener('input', () => springValue.textContent = springSlider.value);
+        massSlider.addEventListener('input', () => massValue.textContent = massSlider.value);
+
+        const mass = { value: parseFloat(massSlider.value) };
+        const springConstant = { value: parseFloat(springSlider.value) };
+        const damping = { value: parseFloat(dampingSlider.value) };
+
+        let time = 0;
+        const dt = 0.016; // Time step
+        let displacement = 150; // Initial displacement
+        let velocity = 0;
+
+        const positions = [];
+
+        function resetSimulation() {
+            time = 0;
+            displacement = 150;
+            velocity = 0;
+            positions.length = 0;
+        }
+
+        resetButton.addEventListener('click', resetSimulation);
+
+        function updatePhysics() {
+    const omega0 = Math.sqrt(springConstant.value / mass.value); // Natural frequency
+    const gamma = damping.value / mass.value; // Normalized damping coefficient
+
+    let acceleration;
+
+    if (dampingTypeSelect.value === "underdamping") {
+        // Underdamping: Damping is less than critical
+        acceleration = -omega0 * omega0 * displacement - gamma * velocity;
+    } else if (dampingTypeSelect.value === "critical") {
+        // Critical damping: Damping is exactly critical
+        const criticalDamping = 2 * Math.sqrt(springConstant.value * mass.value);
+        acceleration = -omega0 * omega0 * displacement - (criticalDamping / mass.value) * velocity;
+    } else if (dampingTypeSelect.value === "overdamping") {
+        // Overdamping: Damping is greater than critical
+        const overdamping = gamma * 1.5; // Arbitrary scaling for visual effect
+        acceleration = -omega0 * omega0 * displacement - overdamping * velocity;
+    }
+
+    velocity += acceleration * dt;
+    displacement += velocity * dt;
+
+    positions.push({ time, displacement });
+    time += dt;
+}
+
+
+        function drawAnimation() {
+            animationCtx.clearRect(0, 0, animationCanvas.width, animationCanvas.height);
+
+            const springX = animationCanvas.width / 2;
+            const springY = 50;
+            const massY = springY + displacement;
+
+            // Draw spring
+            animationCtx.beginPath();
+            animationCtx.moveTo(springX, springY);
+            animationCtx.lineTo(springX, massY);
+            animationCtx.strokeStyle = '#000';
+            animationCtx.lineWidth = 2;
+            animationCtx.stroke();
+
+            // Draw mass
+            animationCtx.beginPath();
+            animationCtx.rect(springX - 12.5, massY, 25, 25);
+            animationCtx.fillStyle = '#007BFF';
+            animationCtx.fill();
+        }
+
+        function drawGraph() {
+            graphCtx.clearRect(0, 0, graphCanvas.width, graphCanvas.height);
+
+            graphCtx.beginPath();
+            graphCtx.moveTo(0, graphCanvas.height / 2);
+            graphCtx.lineTo(graphCanvas.width, graphCanvas.height / 2);
+            graphCtx.strokeStyle = '#000';
+            graphCtx.stroke();
+
+            graphCtx.beginPath();
+            for (let i = 0; i < positions.length; i++) {
+                const x = (positions[i].time / 10) * graphCanvas.width;
+                const y = graphCanvas.height / 2 - positions[i].displacement / 2;
+                graphCtx.lineTo(x, y);
+            }
+            graphCtx.strokeStyle = '#007BFF';
+            graphCtx.stroke();
+        }
+
+        function animate() {
+            updatePhysics();
+            drawAnimation();
+            drawGraph();
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
