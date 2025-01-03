@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matter.js Maze Solver</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+<script>
+    const { Engine, Render, Runner, Bodies, Composite, Body, Events } = Matter;
+
+    const engine = Engine.create();
+    const { world } = engine;
+
+    const width = 800;
+    const height = 600;
+    const rows = 10;
+    const cols = 10;
+    const cellSize = width / cols;
+
+    const render = Render.create({
+        element: document.body,
+        engine: engine,
+        options: { width, height, wireframes: false }
+    });
+    Render.run(render);
+    const runner = Runner.create();
+    Runner.run(runner, engine);
+
+    // Maze grid
+    const grid = Array(rows).fill(null).map(() => Array(cols).fill(false));
+    const walls = [];
+
+    function createMaze() {
+        for (let row = 0; row < rows; row++) {
+            for (let col = 0; col < cols; col++) {
+                if (Math.random() > 0.7) {
+                    const wall = Bodies.rectangle(
+                        col * cellSize + cellSize / 2,
+                        row * cellSize + cellSize / 2,
+                        cellSize,
+                        cellSize,
+                        { isStatic: true, render: { fillStyle: 'black' } }
+                    );
+                    walls.push(wall);
+                    grid[row][col] = true;
+                    Composite.add(world, wall);
+                }
+            }
+        }
+    }
+
+    createMaze();
+
+    // Ball and Goal
+    const ball = Bodies.circle(50, 50, 20, {
+        restitution: 0.5,
+        render: { fillStyle: 'blue' }
+    });
+
+    const goal = Bodies.rectangle(
+        width - cellSize / 2,
+        height - cellSize / 2,
+        cellSize * 0.5,
+        cellSize * 0.5,
+        { isStatic: true, render: { fillStyle: 'green' } }
+    );
+
+    Composite.add(world, [ball, goal]);
+
+    // Simple Pathfinding Logic (Random Walk for demonstration)
+    function moveBall() {
+        const moveInterval = setInterval(() => {
+            const dx = goal.position.x - ball.position.x;
+            const dy = goal.position.y - ball.position.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < 20) {
+                clearInterval(moveInterval);
+                alert('Goal Reached!');
+                return;
+            }
+
+            const directionX = dx > 0 ? 1 : -1;
+            const directionY = dy > 0 ? 1 : -1;
+
+            Body.setVelocity(ball, {
+                x: directionX * 3,
+                y: directionY * 3
+            });
+        }, 100);
+    }
+
+    moveBall();
+
+
+
+</script>
+</body>
+</html>
