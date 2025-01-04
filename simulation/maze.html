@@ -4,102 +4,118 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Matter.js Maze Solver</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.18.0/matter.min.js"></script>
     <style>
-        body { margin: 0; overflow: hidden; }
-        canvas { display: block; }
+        body { margin: 0; overflow: hidden; display: flex; flex-direction: column; align-items: center; }
+        canvas { border: 1px solid black; }
+        select, button { margin: 10px; padding: 5px; }
     </style>
 </head>
 <body>
-<script>
-    const { Engine, Render, Runner, Bodies, Composite, Body, Events } = Matter;
+    <select id="algorithmSelect">
+        <option value="random">Random Walk</option>
+        <option value="bfs">Breadth-First Search</option>
+        <option value="dfs">Depth-First Search</option>
+        <option value="a_star">A* Pathfinding</option>
+    </select>
+    <button onclick="location.reload()">Restart</button>
+    <script>
+        const { Engine, Render, Runner, World, Bodies, Body, Events } = Matter;
 
-    const engine = Engine.create();
-    const { world } = engine;
+        const engine = Engine.create();
+        const { world } = engine;
+        const width = 600;
+        const height = 600;
+        const cells = 10;
+        const cellSize = width / cells;
 
-    const width = 800;
-    const height = 600;
-    const rows = 10;
-    const cols = 10;
-    const cellSize = width / cols;
+        const render = Render.create({
+            element: document.body,
+            engine: engine,
+            options: {
+                wireframes: false,
+                width,
+                height
+            }
+        });
 
-    const render = Render.create({
-        element: document.body,
-        engine: engine,
-        options: { width, height, wireframes: false }
-    });
-    Render.run(render);
-    const runner = Runner.create();
-    Runner.run(runner, engine);
+        Render.run(render);
+        Runner.run(Runner.create(), engine);
 
-    // Maze grid
-    const grid = Array(rows).fill(null).map(() => Array(cols).fill(false));
-    const walls = [];
+        // Walls
+        const walls = [
+            Bodies.rectangle(width / 2, 0, width, 20, { isStatic: true }),
+            Bodies.rectangle(width / 2, height, width, 20, { isStatic: true }),
+            Bodies.rectangle(0, height / 2, 20, height, { isStatic: true }),
+            Bodies.rectangle(width, height / 2, 20, height, { isStatic: true })
+        ];
+        World.add(world, walls);
 
-    function createMaze() {
-        for (let row = 0; row < rows; row++) {
-            for (let col = 0; col < cols; col++) {
+        // Maze Grid Walls
+        const maze = [];
+        for (let row = 0; row < cells; row++) {
+            maze[row] = [];
+            for (let col = 0; col < cells; col++) {
                 if (Math.random() > 0.7) {
                     const wall = Bodies.rectangle(
                         col * cellSize + cellSize / 2,
                         row * cellSize + cellSize / 2,
-                        cellSize,
-                        cellSize,
-                        { isStatic: true, render: { fillStyle: 'black' } }
+                        cellSize, cellSize,
+                        { isStatic: true }
                     );
-                    walls.push(wall);
-                    grid[row][col] = true;
-                    Composite.add(world, wall);
+                    maze[row][col] = wall;
+                    World.add(world, wall);
+                } else {
+                    maze[row][col] = null;
                 }
             }
         }
-    }
 
-    createMaze();
+        // Ball
+        const ballRadius = cellSize / 4;
+        const ball = Bodies.circle(cellSize / 2, cellSize / 2, ballRadius, { label: 'ball' });
+        World.add(world, ball);
 
-    // Ball and Goal
-    const ball = Bodies.circle(50, 50, 20, {
-        restitution: 0.5,
-        render: { fillStyle: 'blue' }
-    });
+        // Goal
+        const goal = Bodies.rectangle(
+            width - cellSize / 2,
+            height - cellSize / 2,
+            cellSize * 0.6,
+            cellSize * 0.6,
+            { isStatic: true, label: 'goal', render: { fillStyle: 'green' } }
+        );
+        World.add(world, goal);
 
-    const goal = Bodies.rectangle(
-        width - cellSize / 2,
-        height - cellSize / 2,
-        cellSize * 0.5,
-        cellSize * 0.5,
-        { isStatic: true, render: { fillStyle: 'green' } }
-    );
+        // Maze Solver Function
+        const algorithmSelect = document.getElementById('algorithmSelect');
 
-    Composite.add(world, [ball, goal]);
-
-    // Simple Pathfinding Logic (Random Walk for demonstration)
-    function moveBall() {
-        const moveInterval = setInterval(() => {
-            const dx = goal.position.x - ball.position.x;
-            const dy = goal.position.y - ball.position.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-
-            if (distance < 20) {
-                clearInterval(moveInterval);
-                alert('Goal Reached!');
-                return;
+        function solveMaze() {
+            const algorithm = algorithmSelect.value;
+            if (algorithm === 'random') {
+                alert('Random Walk Algorithm Selected');
+            } else if (algorithm === 'bfs') {
+                alert('Breadth-First Search Selected');
+            } else if (algorithm === 'dfs') {
+                alert('Depth-First Search Selected');
+            } else if (algorithm === 'a_star') {
+                alert('A* Pathfinding Selected');
             }
+        }
 
-            const directionX = dx > 0 ? 1 : -1;
-            const directionY = dy > 0 ? 1 : -1;
+        algorithmSelect.addEventListener('change', solveMaze);
 
-            Body.setVelocity(ball, {
-                x: directionX * 3,
-                y: directionY * 3
+        // Detect Win Condition
+        Events.on(engine, 'collisionStart', event => {
+            event.pairs.forEach(collision => {
+                if ((collision.bodyA.label === 'ball' && collision.bodyB.label === 'goal') ||
+                    (collision.bodyB.label === 'ball' && collision.bodyA.label === 'goal')) {
+                    alert('You Win!');
+                    engine.timing.timeScale = 0;
+                }
             });
-        }, 100);
-    }
+        });
 
-    moveBall();
-
-
-
-</script>
+        solveMaze();
+    </script>
 </body>
 </html>
