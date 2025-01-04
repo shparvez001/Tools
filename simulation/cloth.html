@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloth Simulation with Wind & Mouse Interaction</title>
+    <style>
+        body { margin: 0; overflow: hidden; display: flex; flex-direction: column; align-items: center; background: black; color: white; }
+        canvas { background: black; border: 1px solid white; margin-top: 10px; }
+        .controls { display: flex; flex-direction: row; align-items: center; }
+        label { margin: 5px; }
+        .slider-info { font-size: 14px; margin-top: -5px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <label for="gravitySlider">Gravity</label>
+        <input type="range" id="gravitySlider" min="0" max="2" step="0.1" value="0.5">
+        
+        <label for="stiffnessSlider">Stiffness</label>
+        <input type="range" id="stiffnessSlider" min="0.01" max="1" step="0.01" value="0.1">
+
+        <label for="dampingSlider">Damping</label>
+        <input type="range" id="dampingSlider" min="0.5" max="1" step="0.01" value="0.98">
+
+        <label for="windSlider">Wind Strength</label>
+        <input type="range" id="windSlider" min="-1" max="1" step="0.1" value="0">
+
+        <button onclick="resetCloth()">🔄 Restart Simulation</button>
+    </div>
+
+    <canvas id="clothCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('clothCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth * 0.9;
+        canvas.height = window.innerHeight * 0.8;
+
+        let gravity = parseFloat(document.getElementById('gravitySlider').value);
+        let stiffness = parseFloat(document.getElementById('stiffnessSlider').value);
+        let damping = parseFloat(document.getElementById('dampingSlider').value);
+        let windStrength = parseFloat(document.getElementById('windSlider').value);
+
+        const spacing = 20;
+        const gridWidth = 40;
+        const gridHeight = 30;
+        let cloth;
+
+        class Particle {
+            constructor(x, y, pinned = false) {
+                this.x = x;
+                this.y = y;
+                this.prevX = x;
+                this.prevY = y;
+                this.pinned = pinned;
+            }
+
+            applyWind() {
+                if (!this.pinned) {
+                    this.x += windStrength;
+                }
+            }
+
+            update() {
+                if (this.pinned) return;
+
+                const vx = (this.x - this.prevX) * damping;
+                const vy = (this.y - this.prevY) * damping;
+
+                this.prevX = this.x;
+                this.prevY = this.y;
+
+                this.x += vx + windStrength;
+                this.y += vy + gravity;
+            }
+        }
+
+        class Constraint {
+            constructor(p1, p2) {
+                this.p1 = p1;
+                this.p2 = p2;
+                this.length = spacing;
+            }
+
+            resolve() {
+                const dx = this.p2.x - this.p1.x;
+                const dy = this.p2.y - this.p1.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const difference = this.length - distance;
+                const percent = difference / distance * stiffness;
+                const offsetX = dx * percent;
+                const offsetY = dy * percent;
+
+                if (!this.p1.pinned) {
+                    this.p1.x -= offsetX / 2;
+                    this.p1.y -= offsetY / 2;
+                }
+                if (!this.p2.pinned) {
+                    this.p2.x += offsetX / 2;
+                    this.p2.y += offsetY / 2;
+                }
+            }
+        }
+
+        class Cloth {
+            constructor() {
+                this.particles = [];
+                this.constraints = [];
+
+                for (let y = 0; y <= gridHeight; y++) {
+                    for (let x = 0; x <= gridWidth; x++) {
+                        const pinned = y === 0 && (x % 5 === 0 || x === 0 || x === gridWidth);
+                        this.particles.push(new Particle(x * spacing + canvas.width / 4, y * spacing, pinned));
+                    }
+                }
+
+                for (let y = 0; y < gridHeight; y++) {
+                    for (let x = 0; x < gridWidth; x++) {
+                        const index = x + y * (gridWidth + 1);
+                        this.constraints.push(new Constraint(this.particles[index], this.particles[index + 1]));
+                        this.constraints.push(new Constraint(this.particles[index], this.particles[index + gridWidth + 1]));
+                    }
+                }
+            }
+
+            update() {
+                for (const particle of this.particles) {
+                    particle.applyWind();
+                    particle.update();
+                }
+                for (let i = 0; i < 5; i++) {
+                    for (const constraint of this.constraints) {
+                        constraint.resolve();
+                    }
+                }
+            }
+
+            draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 1;
+                for (const constraint of this.constraints) {
+                    ctx.beginPath();
+                    ctx.moveTo(constraint.p1.x, constraint.p1.y);
+                    ctx.lineTo(constraint.p2.x, constraint.p2.y);
+                    ctx.stroke();
+                }
+
+                for (const particle of this.particles) {
+                    ctx.beginPath();
+                    ctx.arc(particle.x, particle.y, 3, 0, Math.PI * 2);
+                    ctx.fillStyle = particle.pinned ? 'red' : 'cyan';
+                    ctx.fill();
+                }
+            }
+        }
+
+        function resetCloth() {
+            cloth = new Cloth();
+        }
+
+        function updateSliders() {
+            gravity = parseFloat(document.getElementById('gravitySlider').value);
+            stiffness = parseFloat(document.getElementById('stiffnessSlider').value);
+            damping = parseFloat(document.getElementById('dampingSlider').value);
+            windStrength = parseFloat(document.getElementById('windSlider').value);
+        }
+
+        document.querySelectorAll('input').forEach(slider => {
+            slider.addEventListener('input', updateSliders);
+        });
+
+        let isDragging = false;
+        let mouseX, mouseY;
+
+        canvas.addEventListener('mousedown', (event) => {
+            isDragging = true;
+            mouseX = event.clientX;
+            mouseY = event.clientY;
+        });
+
+        canvas.addEventListener('mousemove', (event) => {
+            if (isDragging) {
+                for (const particle of cloth.particles) {
+                    const dx = event.clientX - particle.x;
+                    const dy = event.clientY - particle.y;
+                    if (Math.sqrt(dx * dx + dy * dy) < 30) {
+                        particle.x = event.clientX;
+                        particle.y = event.clientY;
+                    }
+                }
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        function animate() {
+            cloth.update();
+            cloth.draw();
+            requestAnimationFrame(animate);
+        }
+
+        resetCloth();
+        animate();
+    </script>
+</body>
+</html>
