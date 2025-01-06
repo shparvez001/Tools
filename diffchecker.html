@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Comparison Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+
+        textarea {
+            width: 45%;
+            height: 200px;
+            padding: 10px;
+            margin: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        button, select, label {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            white-space: pre-wrap;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #fafafa;
+        }
+
+        .added {
+            background-color: #d4f7d4;
+        }
+
+        .deleted {
+            background-color: #f7d4d4;
+        }
+
+        .dark-mode {
+            background: #121212;
+            color: white;
+        }
+
+        .dark-mode .container {
+            background: #1e1e1e;
+            color: white;
+        }
+
+        .dark-mode textarea, .dark-mode #result {
+            background: #333;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Text Comparison Tool</h1>
+
+        <!-- Input Areas -->
+        <div class="text-inputs">
+            <textarea id="text1" placeholder="Enter first text here..."></textarea>
+            <textarea id="text2" placeholder="Enter second text here..."></textarea>
+        </div>
+
+        <!-- Control Panel -->
+        <div>
+            <label for="comparison-mode">Comparison Mode:</label>
+            <select id="comparison-mode">
+                <option value="word">Word-by-Word</option>
+                <option value="line">Line-by-Line</option>
+            </select>
+            <button onclick="compareTexts()">Compare Texts</button>
+            <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
+            <button onclick="downloadResults()">Download Results</button>
+        </div>
+
+        <!-- File Import -->
+        <div>
+            <input type="file" id="fileInput1" onchange="loadFile('fileInput1', 'text1')" />
+            <input type="file" id="fileInput2" onchange="loadFile('fileInput2', 'text2')" />
+        </div>
+
+        <!-- Results Display -->
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function compareTexts() {
+            const mode = document.getElementById('comparison-mode').value;
+            const text1 = document.getElementById('text1').value;
+            const text2 = document.getElementById('text2').value;
+
+            const resultElement = document.getElementById('result');
+            let resultHTML = "";
+
+            if (mode === "word") {
+                const words1 = text1.split(/\s+/);
+                const words2 = text2.split(/\s+/);
+                const maxLength = Math.max(words1.length, words2.length);
+
+                for (let i = 0; i < maxLength; i++) {
+                    if (words1[i] === words2[i]) {
+                        resultHTML += words1[i] + " ";
+                    } else {
+                        if (words1[i]) {
+                            resultHTML += `<span class="deleted">${words1[i]}</span> `;
+                        }
+                        if (words2[i]) {
+                            resultHTML += `<span class="added">${words2[i]}</span> `;
+                        }
+                    }
+                }
+            } else if (mode === "line") {
+                const lines1 = text1.split('\n');
+                const lines2 = text2.split('\n');
+                const maxLength = Math.max(lines1.length, lines2.length);
+
+                for (let i = 0; i < maxLength; i++) {
+                    if (lines1[i] === lines2[i]) {
+                        resultHTML += lines1[i] + "\n";
+                    } else {
+                        if (lines1[i]) {
+                            resultHTML += `<span class="deleted">${lines1[i]}</span>\n`;
+                        }
+                        if (lines2[i]) {
+                            resultHTML += `<span class="added">${lines2[i]}</span>\n`;
+                        }
+                    }
+                }
+            }
+
+            resultElement.innerHTML = resultHTML;
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+        }
+
+        function downloadResults() {
+            const resultText = document.getElementById('result').innerText;
+            const blob = new Blob([resultText], { type: "text/plain" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "comparison_results.txt";
+            link.click();
+        }
+
+        function loadFile(inputId, textAreaId) {
+            const fileInput = document.getElementById(inputId);
+            const textArea = document.getElementById(textAreaId);
+
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                textArea.value = event.target.result;
+            };
+            reader.readAsText(fileInput.files[0]);
+        }
+    </script>
+</body>
+</html>
