@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Text Comparison Tool</title>
+    <title>Advanced Text Comparison Tool</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -33,9 +33,14 @@
             font-size: 16px;
         }
 
-        button, select, label {
+        .text-container {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        button, select, label, input {
             margin-top: 10px;
-            padding: 10px 20px;
+            padding: 10px;
             background: #007BFF;
             color: white;
             border: none;
@@ -47,13 +52,19 @@
             background: #0056b3;
         }
 
-        #result {
+        .result-container {
+            display: flex;
+            justify-content: space-between;
             margin-top: 20px;
+        }
+
+        .result-box {
+            width: 45%;
             padding: 10px;
-            white-space: pre-wrap;
             border: 1px solid #ddd;
             border-radius: 10px;
             background: #fafafa;
+            white-space: pre-wrap;
         }
 
         .added {
@@ -74,7 +85,7 @@
             color: white;
         }
 
-        .dark-mode textarea, .dark-mode #result {
+        .dark-mode textarea, .dark-mode .result-box {
             background: #333;
             color: white;
         }
@@ -82,34 +93,34 @@
 </head>
 <body>
     <div class="container">
-        <h1>Text Comparison Tool</h1>
+        <h1>Advanced Text Comparison Tool</h1>
 
-        <!-- Input Areas -->
-        <div class="text-inputs">
+        <!-- Text Areas -->
+        <div class="text-container">
             <textarea id="text1" placeholder="Enter first text here..."></textarea>
             <textarea id="text2" placeholder="Enter second text here..."></textarea>
         </div>
 
-        <!-- Control Panel -->
+        <!-- Options Panel -->
         <div>
             <label for="comparison-mode">Comparison Mode:</label>
             <select id="comparison-mode">
                 <option value="word">Word-by-Word</option>
                 <option value="line">Line-by-Line</option>
             </select>
+
+            <label for="regexFilter">Regex Filter (Optional):</label>
+            <input type="text" id="regexFilter" placeholder="e.g. \d+ to remove numbers" />
+
             <button onclick="compareTexts()">Compare Texts</button>
             <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
-            <button onclick="downloadResults()">Download Results</button>
         </div>
 
-        <!-- File Import -->
-        <div>
-            <input type="file" id="fileInput1" onchange="loadFile('fileInput1', 'text1')" />
-            <input type="file" id="fileInput2" onchange="loadFile('fileInput2', 'text2')" />
+        <!-- Side-by-Side Results -->
+        <div class="result-container">
+            <pre class="result-box" id="result1">Text 1 Differences</pre>
+            <pre class="result-box" id="result2">Text 2 Differences</pre>
         </div>
-
-        <!-- Results Display -->
-        <div id="result"></div>
     </div>
 
     <script>
@@ -117,71 +128,65 @@
             const mode = document.getElementById('comparison-mode').value;
             const text1 = document.getElementById('text1').value;
             const text2 = document.getElementById('text2').value;
+            const regexFilter = document.getElementById('regexFilter').value;
 
-            const resultElement = document.getElementById('result');
-            let resultHTML = "";
+            let filteredText1 = text1;
+            let filteredText2 = text2;
+
+            // Apply regex filter if provided
+            if (regexFilter) {
+                try {
+                    const regex = new RegExp(regexFilter, 'g');
+                    filteredText1 = text1.replace(regex, '');
+                    filteredText2 = text2.replace(regex, '');
+                } catch (error) {
+                    alert("Invalid regex pattern!");
+                    return;
+                }
+            }
+
+            const resultElement1 = document.getElementById('result1');
+            const resultElement2 = document.getElementById('result2');
+
+            let resultHTML1 = "";
+            let resultHTML2 = "";
 
             if (mode === "word") {
-                const words1 = text1.split(/\s+/);
-                const words2 = text2.split(/\s+/);
+                const words1 = filteredText1.split(/\s+/);
+                const words2 = filteredText2.split(/\s+/);
                 const maxLength = Math.max(words1.length, words2.length);
 
                 for (let i = 0; i < maxLength; i++) {
                     if (words1[i] === words2[i]) {
-                        resultHTML += words1[i] + " ";
+                        resultHTML1 += words1[i] + " ";
+                        resultHTML2 += words2[i] + " ";
                     } else {
-                        if (words1[i]) {
-                            resultHTML += `<span class="deleted">${words1[i]}</span> `;
-                        }
-                        if (words2[i]) {
-                            resultHTML += `<span class="added">${words2[i]}</span> `;
-                        }
+                        resultHTML1 += words1[i] ? `<span class="deleted">${words1[i]}</span> ` : '';
+                        resultHTML2 += words2[i] ? `<span class="added">${words2[i]}</span> ` : '';
                     }
                 }
             } else if (mode === "line") {
-                const lines1 = text1.split('\n');
-                const lines2 = text2.split('\n');
+                const lines1 = filteredText1.split('\n');
+                const lines2 = filteredText2.split('\n');
                 const maxLength = Math.max(lines1.length, lines2.length);
 
                 for (let i = 0; i < maxLength; i++) {
                     if (lines1[i] === lines2[i]) {
-                        resultHTML += lines1[i] + "\n";
+                        resultHTML1 += lines1[i] + "\n";
+                        resultHTML2 += lines2[i] + "\n";
                     } else {
-                        if (lines1[i]) {
-                            resultHTML += `<span class="deleted">${lines1[i]}</span>\n`;
-                        }
-                        if (lines2[i]) {
-                            resultHTML += `<span class="added">${lines2[i]}</span>\n`;
-                        }
+                        resultHTML1 += lines1[i] ? `<span class="deleted">${lines1[i]}</span>\n` : '';
+                        resultHTML2 += lines2[i] ? `<span class="added">${lines2[i]}</span>\n` : '';
                     }
                 }
             }
 
-            resultElement.innerHTML = resultHTML;
+            resultElement1.innerHTML = resultHTML1;
+            resultElement2.innerHTML = resultHTML2;
         }
 
         function toggleDarkMode() {
             document.body.classList.toggle('dark-mode');
-        }
-
-        function downloadResults() {
-            const resultText = document.getElementById('result').innerText;
-            const blob = new Blob([resultText], { type: "text/plain" });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = "comparison_results.txt";
-            link.click();
-        }
-
-        function loadFile(inputId, textAreaId) {
-            const fileInput = document.getElementById(inputId);
-            const textArea = document.getElementById(textAreaId);
-
-            const reader = new FileReader();
-            reader.onload = function (event) {
-                textArea.value = event.target.result;
-            };
-            reader.readAsText(fileInput.files[0]);
         }
     </script>
 </body>
