@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Projectile Motion Simulator</title>
+    <style>
+        body { 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            background: white; 
+            color: #111; 
+        }
+        canvas { 
+            border: 2px solid black; 
+            background: #65d2da; 
+        }
+        .controls { 
+            display: flex; 
+            flex-direction: row; 
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 10px; 
+        }
+        .control { 
+            margin: 5px; 
+            padding: 5px; 
+            border: 1px solid black; 
+            border-radius: 5px; 
+            background: #f0f0f0; 
+        }
+        label { 
+            margin: 5px; 
+        }
+        button { 
+            margin: 5px; 
+            padding: 5px; 
+        }
+        .output {
+            margin-top: 10px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Projectile Motion Simulator</h1>
+
+    <canvas id="projectileCanvas"></canvas>
+
+    <div class="controls">
+        <div class="control">
+            <label>Initial Velocity (m/s): <span id="velocityValue">50</span></label>
+            <input type="range" id="velocitySlider" min="10" max="100" value="50">
+        </div>        
+
+        <div class="control">
+            <label>Launch Angle (°): <span id="angleValue">45</span></label>
+            <input type="range" id="angleSlider" min="0" max="90" value="45">
+        </div>
+
+        <div class="control">
+            <label>Gravity (m/s²): <span id="gravityValue">9.8</span></label>
+            <input type="range" id="gravitySlider" min="1" max="20" value="9.8">
+        </div>
+
+        <div class="control">
+            <label>Air Resistance Coefficient: <span id="airResistanceValue">0.01</span></label>
+            <input type="range" id="airResistanceSlider" min="0" max="0.1" step="0.01" value="0.01">
+        </div>
+        
+    </div>
+    <button onclick="restartSimulation()">🔄 Restart Simulation</button>
+
+    
+    <div class="output">
+        <p>Time of Flight: <span id="timeOfFlight">0</span> s</p>
+        <p>Maximum Height: <span id="maxHeight">0</span> m</p>
+        <p>Range: <span id="range">0</span> m</p>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('projectileCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth * 0.9;
+        canvas.height = window.innerHeight * 0.7;
+
+        const velocitySlider = document.getElementById("velocitySlider");
+        const angleSlider = document.getElementById("angleSlider");
+        const velocityValue = document.getElementById("velocityValue");
+        const angleValue = document.getElementById("angleValue");
+
+        const timeOfFlightDisplay = document.getElementById("timeOfFlight");
+        const maxHeightDisplay = document.getElementById("maxHeight");
+        const rangeDisplay = document.getElementById("range");
+
+        let initialVelocity = 50;
+        let angle = 45;
+        let gravity = 9.8;
+        let airResistance = 0.01;
+        let time = 0;
+        let projectiles = [];
+        let isSimulating = false;
+
+        class Projectile {
+            constructor(x, y, velocityX, velocityY) {
+                this.x = x;
+                this.y = y;
+                this.velocityX = velocityX;
+                this.velocityY = velocityY;
+                this.radius = 10;
+                this.path = [];
+            }
+
+            update(deltaTime) {
+                // Apply air resistance and gravity
+                const speed = Math.sqrt(this.velocityX ** 2 + this.velocityY ** 2);
+                const airDrag = airResistance * speed * speed;
+                const angleDrag = Math.atan2(this.velocityY, this.velocityX);
+                
+                this.velocityX -= airDrag * Math.cos(angleDrag) * deltaTime;
+                this.velocityY += gravity * deltaTime - airDrag * Math.sin(angleDrag) * deltaTime;
+
+                this.x += this.velocityX * deltaTime;
+                this.y += this.velocityY * deltaTime;
+
+                // Store position for trajectory plotting
+                this.path.push({ x: this.x, y: this.y });
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'red';
+                ctx.fill();
+
+                // Draw trajectory points
+                ctx.beginPath();
+                ctx.strokeStyle = 'yellow';
+                this.path.forEach(point => {
+                    ctx.moveTo(point.x, point.y);
+                    ctx.arc(point.x, point.y, 1, 0, Math.PI * 2);
+                });
+                ctx.stroke();
+            }
+        }
+
+        function restartSimulation() {
+            initialVelocity = parseFloat(document.getElementById('velocitySlider').value);
+            angle = parseFloat(document.getElementById('angleSlider').value);
+            gravity = parseFloat(document.getElementById('gravitySlider').value);
+            airResistance = parseFloat(document.getElementById('airResistanceSlider').value);
+
+            time = 0;
+            projectiles = []; // Clear previous projectiles
+            isSimulating = true;
+
+            // Convert angle to radians and calculate velocity components
+            const angleRadians = (angle * Math.PI) / 180;
+            const velocityX = initialVelocity * Math.cos(angleRadians);
+            const velocityY = -initialVelocity * Math.sin(angleRadians);
+
+            // Add multiple projectiles for visualization
+            for (let i = 0; i < 3; i++) {
+                projectiles.push(new Projectile(50, canvas.height - 50, velocityX + i * 10, velocityY));
+            }
+        }
+
+        function updateSliders() {
+            document.getElementById('velocityValue').textContent = document.getElementById('velocitySlider').value;
+            document.getElementById('angleValue').textContent = document.getElementById('angleSlider').value;
+            document.getElementById('gravityValue').textContent = document.getElementById('gravitySlider').value;
+            document.getElementById('airResistanceValue').textContent = document.getElementById('airResistanceSlider').value;
+        }
+
+        document.querySelectorAll('input').forEach(slider => {
+            slider.addEventListener('input', updateSliders);
+        });
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (isSimulating) {
+                projectiles.forEach(projectile => {
+                    projectile.update(0.016); 
+                    projectile.draw();
+                    if (projectile.y + projectile.radius >= canvas.height) {
+                        isSimulating = false;
+                    }
+                });
+            }
+
+            // Draw ground
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, canvas.height - 5, canvas.width, 5);
+
+            requestAnimationFrame(animate);
+        }
+
+        restartSimulation(); 
+        animate(); 
+    </script>
+</body>
+</html>
