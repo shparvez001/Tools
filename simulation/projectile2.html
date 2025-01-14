@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projectile Motion Simulator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        canvas {
+            border: 1px solid black;
+            background: #f0f0f0;
+        }
+        .controls {
+            margin: 20px;
+        }
+        .output {
+            margin-top: 10px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Projectile Motion Simulator</h1>
+    <canvas id="canvas" width="800" height="400"></canvas>
+    <div class="controls">
+        <label>Initial Velocity (m/s):</label>
+        <input type="range" id="velocitySlider" min="10" max="100" value="50">
+        <span id="velocityValue">50</span> m/s
+        <br>
+        <label>Angle (degrees):</label>
+        <input type="range" id="angleSlider" min="0" max="90" value="45">
+        <span id="angleValue">45</span>°
+        <br>
+        <button onclick="startSimulation()">Start Simulation</button>
+        <button onclick="resetSimulation()">Reset</button>
+    </div>
+    <div class="output">
+        <p>Time of Flight: <span id="timeOfFlight">0</span> s</p>
+        <p>Maximum Height: <span id="maxHeight">0</span> m</p>
+        <p>Range: <span id="range">0</span> m</p>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+
+        const velocitySlider = document.getElementById("velocitySlider");
+        const angleSlider = document.getElementById("angleSlider");
+        const velocityValue = document.getElementById("velocityValue");
+        const angleValue = document.getElementById("angleValue");
+
+        const timeOfFlightDisplay = document.getElementById("timeOfFlight");
+        const maxHeightDisplay = document.getElementById("maxHeight");
+        const rangeDisplay = document.getElementById("range");
+
+        let velocity = parseFloat(velocitySlider.value);
+        let angle = parseFloat(angleSlider.value) * (Math.PI / 180); // Convert to radians
+        const g = 9.81; // Gravity
+
+        let ball = { x: 50, y: canvas.height - 20, radius: 10, vx: 0, vy: 0, launched: false };
+
+        velocitySlider.oninput = () => {
+            velocity = parseFloat(velocitySlider.value);
+            velocityValue.textContent = velocity;
+        };
+
+        angleSlider.oninput = () => {
+            angle = parseFloat(angleSlider.value) * (Math.PI / 180);
+            angleValue.textContent = angleSlider.value;
+        };
+
+        function calculateValues() {
+            const timeOfFlight = (2 * velocity * Math.sin(angle)) / g;
+            const maxHeight = (velocity ** 2 * Math.sin(angle) ** 2) / (2 * g);
+            const range = (velocity ** 2 * Math.sin(2 * angle)) / g;
+
+            timeOfFlightDisplay.textContent = timeOfFlight.toFixed(2);
+            maxHeightDisplay.textContent = maxHeight.toFixed(2);
+            rangeDisplay.textContent = range.toFixed(2);
+        }
+
+        function startSimulation() {
+            ball.x = 50;
+            ball.y = canvas.height - 20;
+            ball.vx = velocity * Math.cos(angle);
+            ball.vy = -velocity * Math.sin(angle);
+            ball.launched = true;
+            calculateValues();
+            animate();
+        }
+
+        function resetSimulation() {
+            ball.launched = false;
+            ball.x = 50;
+            ball.y = canvas.height - 20;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBall();
+            timeOfFlightDisplay.textContent = "0";
+            maxHeightDisplay.textContent = "0";
+            rangeDisplay.textContent = "0";
+        }
+
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fillStyle = "red";
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function animate() {
+            if (!ball.launched) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBall();
+
+            ball.x += ball.vx;
+            ball.y += ball.vy;
+            ball.vy += g * 0.1;
+
+            if (ball.y >= canvas.height - ball.radius) {
+                ball.launched = false;
+            } else {
+                requestAnimationFrame(animate);
+            }
+        }
+
+        drawBall(); // Initial ball draw
+    </script>
+</body>
+</html>
