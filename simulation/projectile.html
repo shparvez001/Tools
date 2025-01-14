@@ -39,7 +39,7 @@
             padding: 5px; 
         }
         .output {
-            margin-top: 10px;
+            margin-top: 5px;
             font-size: 18px;
         }
     </style>
@@ -74,7 +74,7 @@
     <button onclick="restartSimulation()">🔄 Restart Simulation</button>
 
     
-    <div class="output">
+    <div class="output" hidden>
         <p>Time of Flight: <span id="timeOfFlight">0</span> s</p>
         <p>Maximum Height: <span id="maxHeight">0</span> m</p>
         <p>Range: <span id="range">0</span> m</p>
@@ -87,10 +87,10 @@
         canvas.width = window.innerWidth * 0.9;
         canvas.height = window.innerHeight * 0.7;
 
-        const velocitySlider = document.getElementById("velocitySlider");
-        const angleSlider = document.getElementById("angleSlider");
-        const velocityValue = document.getElementById("velocityValue");
-        const angleValue = document.getElementById("angleValue");
+        // const velocitySlider = document.getElementById("velocitySlider");
+        // const angleSlider = document.getElementById("angleSlider");
+        // const velocityValue = document.getElementById("velocityValue");
+        // const angleValue = document.getElementById("angleValue");
 
         const timeOfFlightDisplay = document.getElementById("timeOfFlight");
         const maxHeightDisplay = document.getElementById("maxHeight");
@@ -103,6 +103,7 @@
         let time = 0;
         let projectiles = [];
         let isSimulating = false;
+        let projectileColors = ['red', 'yellow', 'purple', 'blue', 'green', 'orange'];
 
         class Projectile {
             constructor(x, y, velocityX, velocityY) {
@@ -112,6 +113,9 @@
                 this.velocityY = velocityY;
                 this.radius = 10;
                 this.path = [];
+                //this.projectileColor = projectileColors[Math.floor(Math.random() * projectileColors.length)];
+                //Give each projectile color in sequence
+                this.projectileColor = projectileColors[projectiles.length];
             }
 
             update(deltaTime) {
@@ -132,19 +136,31 @@
 
             draw() {
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = 'red';
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);                
+                ctx.fillStyle = this.projectileColor;
                 ctx.fill();
 
                 // Draw trajectory points
                 ctx.beginPath();
-                ctx.strokeStyle = 'yellow';
+                ctx.strokeStyle = this.projectileColor;
                 this.path.forEach(point => {
                     ctx.moveTo(point.x, point.y);
-                    ctx.arc(point.x, point.y, 1, 0, Math.PI * 2);
+                    ctx.arc(point.x, point.y, 0.25, 0, Math.PI * 2);
                 });
                 ctx.stroke();
             }
+        }
+
+        // Calculate values for the projectile
+        //Function incomplete. Need to calculate for each projectile
+        function calculateValues() {
+            const timeOfFlight = (2 * velocity * Math.sin(angle)) / g;
+            const maxHeight = (velocity ** 2 * Math.sin(angle) ** 2) / (2 * g);
+            const range = (velocity ** 2 * Math.sin(2 * angle)) / g;
+
+            timeOfFlightDisplay.textContent = timeOfFlight.toFixed(2);
+            maxHeightDisplay.textContent = maxHeight.toFixed(2);
+            rangeDisplay.textContent = range.toFixed(2);
         }
 
         function restartSimulation() {
@@ -164,7 +180,8 @@
 
             // Add multiple projectiles for visualization
             for (let i = 0; i < 3; i++) {
-                projectiles.push(new Projectile(50, canvas.height - 50, velocityX + i * 10, velocityY));
+                projectiles.push(new Projectile(50, canvas.height - 15, velocityX + i * 10, velocityY));
+                //calculateValues(); // Calculate values for each projectile
             }
         }
 
@@ -180,7 +197,10 @@
         });
 
         function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (isSimulating) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+            
 
             if (isSimulating) {
                 projectiles.forEach(projectile => {
@@ -193,7 +213,7 @@
             }
 
             // Draw ground
-            ctx.fillStyle = 'white';
+            ctx.fillStyle = 'green';
             ctx.fillRect(0, canvas.height - 5, canvas.width, 5);
 
             requestAnimationFrame(animate);
