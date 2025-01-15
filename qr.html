@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator & Decryptor</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        canvas, img { border: 1px solid #ddd; }
+        input, button, textarea { margin: 10px; padding: 8px; }
+        #drop-area { border: 2px dashed #ccc; padding: 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>QR Code Generator & Decryptor</h1>
+
+    <!-- QR Code Generation Section -->
+    <div>
+        <h2>Generate QR Code</h2>
+        <textarea id="qr-input" rows="3" cols="50" placeholder="Type text here..."></textarea><br>
+        <label>Error Correction Level:</label>
+        <select id="error-level">
+            <option value="L">L (Low)</option>
+            <option value="M">M (Medium)</option>
+            <option value="Q">Q (Quartile)</option>
+            <option value="H">H (High)</option>
+        </select><br>
+         <!-- Style Customization Options -->
+        <label for="fg-color">Foreground Color:</label>
+        <input type="color" name="fg-color" id="fg-color" value="#000000">
+        <label for="bg-color">Background Color:</label>
+        <input type="color" name="bg-color" id="bg-color" value="#ffffff"><br>
+        
+        <label>Size:</label>
+        <input type="range" id="qr-size" min="100" max="400" value="300"> 
+        <span id="qr-size-label">300px</span><br>
+        <button onclick="generateQR()">Generate QR Code</button>
+        <button onclick="downloadQR()">Download QR Code</button>
+        <button onclick="clearQR()">Clear</button>
+        <canvas id="qr-canvas"></canvas>
+    </div>
+
+    <!-- QR Code Decryption Section -->
+    <div>
+        <h2>Decrypt QR Code</h2>
+        <div id="drop-area">Drag & Drop an Image Here or Click to Upload</div>
+        <input type="file" id="qr-file" accept="image/*" hidden>
+        <p id="decoded-text"></p>
+        <button onclick="clearDecoded()">Clear</button>
+        <button onclick="copyToClipboard()">Copy Decoded Text</button>
+    </div>
+
+    <script>
+        const qrInput = document.getElementById('qr-input');
+        const qrCanvas = document.getElementById('qr-canvas');
+        const errorLevelSelect = document.getElementById('error-level');
+        const fgColorInput = document.getElementById('fg-color');
+        const bgColorInput = document.getElementById('bg-color');
+        const qrSizeInput = document.getElementById('qr-size');
+        const qrSizeLabel = document.getElementById('qr-size-label');
+
+        // Generate QR Code with error correction
+        function generateQR() {
+            const text = qrInput.value;
+            const errorLevel = errorLevelSelect.value;
+            if (!text) return alert('Please enter text.');
+            const size = parseInt(qrSizeInput.value);
+            const fgColor = fgColorInput.value;
+            const bgColor = bgColorInput.value;
+
+            qrSizeLabel.textContent = `${size}px`;
+
+            if (text.trim() === "") {
+                alert("Please enter text.");
+                return;
+            }
+
+            QRCode.toCanvas(qrCanvas, text, {
+                color: {
+                    dark: fgColor,
+                    light: bgColor
+                },
+                errorCorrectionLevel: errorLevel,
+                width: size
+            }, (error) => {
+                if (error) console.error(error);
+            });
+        }
+
+        // Download QR Code
+        function downloadQR() {
+            const link = document.createElement('a');
+            link.download = 'qr-code.png';
+            link.href = qrCanvas.toDataURL();
+            link.click();
+        }
+
+        // Clear QR Code
+        function clearQR() {
+            qrInput.value = '';
+            const ctx = qrCanvas.getContext('2d');
+            ctx.clearRect(0, 0, qrCanvas.width, qrCanvas.height);
+        }
+
+        // Drag & Drop Handling
+        const dropArea = document.getElementById('drop-area');
+        const qrFileInput = document.getElementById('qr-file');
+
+        dropArea.addEventListener('click', () => qrFileInput.click());
+
+        dropArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropArea.style.borderColor = 'green';
+        });
+
+        dropArea.addEventListener('dragleave', () => {
+            dropArea.style.borderColor = '#ccc';
+        });
+
+        dropArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropArea.style.borderColor = '#ccc';
+            const file = e.dataTransfer.files[0];
+            processQRImage(file);
+        });
+
+        qrFileInput.addEventListener('change', (e) => {
+            processQRImage(e.target.files[0]);
+        });
+
+        function processQRImage(file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const code = jsQR(imageData.data, canvas.width, canvas.height);
+
+                    document.getElementById('decoded-text').textContent = code ? `Decoded: ${code.data}` : 'No QR code detected.';
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearDecoded() {
+            document.getElementById('decoded-text').textContent = '';
+        }
+    </script>
+</body>
+</html>
